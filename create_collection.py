@@ -11,7 +11,7 @@ import pymongo
 from dotenv import load_dotenv
 
 
-def create_collection(channel_url, db_connection_string):
+def create_collection(channel_url, channel_name, db_connection_string):
 
     cmd = 'yt-dlp --get-filename -o \'{"upload_date": "%(upload_date)s", "title": "%(title)s", "url": "https://www.youtube.com/watch?v=%(id)s", "downloaded": false, "uploaded": false}, \' ' + f'"{channel_url}"'  # noqa
 
@@ -29,12 +29,12 @@ def create_collection(channel_url, db_connection_string):
 
     client = pymongo.MongoClient(db_connection_string)
     db = client['yt']
-    db['demo'].insert_many(data)
+    db[channel_name].insert_many(data)
 
 
 if __name__ == '__main__':
     load_dotenv()
-    channel_url = sys.argv[1]
     create_collection(
-        channel_url=channel_url,
+        channel_url=sys.argv[1],
+        channel_name=sys.argv[2],
         db_connection_string=os.getenv('MONGODB_CONNECTION_STRING'))
