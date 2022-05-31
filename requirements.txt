@@ -1,4 +1,4 @@
-pymongo>=4.0.2
+pymongo[srv]>=4.0.2
 yt_dlp>=2022.5.18
 python-dotenv>=0.20.0
 internetarchive>=3.0.0
