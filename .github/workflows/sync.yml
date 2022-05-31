@@ -28,8 +28,10 @@ jobs:
       env:
         ARCHIVE_USERNAME: ${{ secrets.ARCHIVE_USERNAME }}
         ARCHIVE_PASSWORD: ${{ secrets.ARCHIVE_PASSWORD }}
-        MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         CHANNEL_NAME: ${{ secrets.CHANNEL_NAME }}
+        MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
+        JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
+        JSONBIN_ID: ${{ secrets.JSONBIN_ID }}
       run: |
         ia configure --username="$ARCHIVE_USERNAME" --password="$ARCHIVE_PASSWORD"
         python archive_yt_channel.py "$CHANNEL_NAME"

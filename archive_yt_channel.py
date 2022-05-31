@@ -9,24 +9,34 @@ import pymongo
 import yt_dlp
 from dotenv import load_dotenv
 from internetarchive import upload
+from loguru import logger
 from tqdm import tqdm
 
 from clean_name import clean_fname
+from jsonbin_manager import JSONBin
 
 
-def archive_yt_channel(channel_name, db_connection_string, skip_list=None):
-    client = pymongo.MongoClient(db_connection_string)
-    db = client['yt']
-    col = db[channel_name]
+def archive_yt_channel(channel_name, skip_list=None):
+    jsonbin, mongodb = False, False
 
-    data = list(db[channel_name].find({}))
+    if os.getenv('MONGODB_CONNECTION_STRING'):
+        client = pymongo.MongoClient(os.getenv('MONGODB_CONNECTION_STRING'))
+        db = client['yt']
+        col = db[channel_name]
+        data = list(db[channel_name].find({}))
+        mongodb = True
+
+    elif os.getenv('JSONBIN_KEY') and os.getenv('JSONBIN_ID'):
+        jb = JSONBin(os.getenv('JSONBIN_KEY'), os.getenv('JSONBIN_ID'))
+        data = jb.api_request().json()['record']
+        jsonbin = True
 
     for video in tqdm(data):
 
         _id = video['url'].split('watch?v=')[1]
         if skip_list:
             if _id in skip_list:
-                print(f'Skipped {video}...')
+                logger.debug(f'Skipped {video} (skip list)...')
                 continue
 
         ts = video['upload_date']
@@ -41,11 +51,21 @@ def archive_yt_channel(channel_name, db_connection_string, skip_list=None):
             if not Path(fname).exists():
                 video['downloaded'] = False
 
-
         if not video['downloaded']:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download(video['url'])
-            col.update_one({'_id': _id}, {'$set': {'downloaded': True}})
+                try:
+                    ydl.download(video['url'])
+                    if mongodb:
+                        col.update_one({'_id': _id},
+                                       {'$set': {
+                                           'downloaded': True
+                                       }})
+                    elif jsonbin:
+                        video['downloaded'] = True
+                        jb.update_bin(video)
+                except yt_dlp.utils.DownloadError as e:
+                    logger.exception(e)
+                    continue
 
         publish_date = f'{y}-{m}-{d} 00:00:00'
 
@@ -65,14 +85,17 @@ def archive_yt_channel(channel_name, db_connection_string, skip_list=None):
             r = upload(identifier, files=[fname], metadata=md)
             status_code = r[0].status_code
             if status_code == 200:
-                col.update_one({'_id': _id}, {'$set': {'uploaded': True}})
+                if mongodb:
+                    col.update_one({'_id': _id}, {'$set': {'uploaded': True}})
+                elif jsonbin:
+                    video['uploaded'] = True
+                    jb.update_bin(video)
                 Path(fname).unlink()
             else:
-                print(status_code)
+                logger.error(
+                    f'Error uploading {video} (status code: {status_code})')
 
 
 if __name__ == '__main__':
     load_dotenv()
-    archive_yt_channel(
-        channel_name=sys.argv[1],
-        db_connection_string=os.getenv('MONGODB_CONNECTION_STRING'))
+    archive_yt_channel(channel_name=sys.argv[1])
