@@ -3,15 +3,16 @@
 
 import re
 import string
+import sys
 from pathlib import Path
 
 
 def clean_fname(file_name):
     illegal = [
-        x for x in string.punctuation + string.whitespace if x not in '._-'
+        x for x in string.punctuation + string.whitespace if x not in '_-'
     ]
 
-    fname = Path(file_name).stem
+    fname = Path(file_name).name
 
     matches = re.search(r'\s\[(?<=\[).+?(?=\])\]', fname)
     if matches:
@@ -26,9 +27,9 @@ def clean_fname(file_name):
     if clean_fname.endswith('-'):
         clean_fname = clean_fname[:-1]
 
-    clean_fname = f'{clean_fname}{Path(file_name).suffix}'
+    clean_fname = f'{clean_fname}.mp4'
     return clean_fname
 
 
 if __name__ == '__main__':
-    clean_fname()
+    print(clean_fname(sys.argv[1]))

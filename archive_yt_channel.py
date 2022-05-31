@@ -37,23 +37,29 @@ def archive_yt_channel(channel_name, db_connection_string, skip_list=None):
 
         ydl_opts = {'format': 'mp4/bestaudio+bestvideo', 'outtmpl': fname}
 
+        if video['downloaded'] and not video['uploaded']:
+            if not Path(fname).exists():
+                video['downloaded'] = False
+
+
         if not video['downloaded']:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download(video['url'])
             col.update_one({'_id': _id}, {'$set': {'downloaded': True}})
 
         publish_date = f'{y}-{m}-{d} 00:00:00'
-        md = {
-            'collection': 'opensource_movies',
-            'title': video['title'],
-            'mediatype': 'movies',
-            'description':
-            f'Title: {video["title"]}\nPublished on: {publish_date}'
-        }
 
         identifier = f'{y}-{m}-{d}_{channel_name}'
         left_len = 80 - (len(identifier) + 1)
         identifier = f'{identifier}_{clean_name[:left_len]}'
+
+        md = {
+            'collection': 'opensource_movies',
+            'title': identifier,
+            'mediatype': 'movies',
+            'description':
+            f'Title: {video["title"]}\nPublished on: {publish_date}'
+        }
 
         if not video['uploaded']:
             r = upload(identifier, files=[fname], metadata=md)
