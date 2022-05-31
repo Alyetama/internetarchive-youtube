@@ -18,8 +18,8 @@ jobs:
       with:
         python-version: "3.9"
       env:
-        USERNAME: ${{ secrets.USERNAME }}
-        PASSWORD: ${{ secrets.PASSWORD }}
+        ARCHIVE_USERNAME: ${{ secrets.ARCHIVE_USERNAME }}
+        ARCHIVE_PASSWORD: ${{ secrets.ARCHIVE_PASSWORD }}
         MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         CHANNEL_NAME: ${{ secrets.CHANNEL_NAME }}
     - name: Install dependencies
