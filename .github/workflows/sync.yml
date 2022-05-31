@@ -2,6 +2,7 @@ name: Yt-Archive-Sync
 
 on:
   workflow_dispatch:
+  push:
 
 permissions:
   contents: read
@@ -17,18 +18,16 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.9"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Run main app
       env:
         ARCHIVE_USERNAME: ${{ secrets.ARCHIVE_USERNAME }}
         ARCHIVE_PASSWORD: ${{ secrets.ARCHIVE_PASSWORD }}
         MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         CHANNEL_NAME: ${{ secrets.CHANNEL_NAME }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Configure ia
       run: |
         ia configure --username="$USERNAME" --password="$PASSWORD"
-    - name: Run archive_yt_channel.py
-      run: |
         python archive_yt_channel.py "$CHANNEL_NAME"
