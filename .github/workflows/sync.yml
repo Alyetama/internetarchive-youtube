@@ -33,4 +33,5 @@ jobs:
         JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
       run: |
         ia configure --username="$ARCHIVE_USERNAME" --password="$ARCHIVE_PASSWORD"
+        python create_collection.py
         python archive_yt_channel.py
