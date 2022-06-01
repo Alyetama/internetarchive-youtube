@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import os
-
 import requests
 
 
 class JSONBin:
 
-    def __init__(self, channel_name, jsonbin_key):
-        self.channel_name = channel_name
+    def __init__(self, jsonbin_key):
         self.jsonbin_key = jsonbin_key
 
     def handle_collection_bins(self, include_data=None):
@@ -38,19 +35,19 @@ class JSONBin:
 
         bin_id = [
             b['record'] for b in resp.json()
-            if self.channel_name == b['snippetMeta']['name']
+            if b['snippetMeta']['name'] == 'DATA'
         ]
         if bin_id:
+            # If the bin exists, return it
             bin_id = bin_id[0]
         else:
+            # If not (first run), create a bin with the initial data
             print('Creating a new bin...')
             headers.update({
-                'X-Bin-Name': self.channel_name,
+                'X-Bin-Name': 'DATA',
                 'Content-Type': 'application/json',
                 'X-Collection-Id': collection_id
             })
-            if not include_data:
-                include_data = [None]
             resp = requests.post(f'{url}/b',
                                  json=include_data,
                                  headers=headers)
