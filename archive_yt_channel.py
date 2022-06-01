@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os
+import uuid
 from pathlib import Path
 
 import pymongo
@@ -91,9 +92,14 @@ def archive_yt_channel(skip_list=None):
             try:
                 r = upload(identifier, files=[fname], metadata=md)
             except requests.exceptions.HTTPError as e:
-                logger.error(f'Error with video: {video}')
-                logger.exception(e)
-                continue
+                try:
+                    logger.error(e)
+                    r = upload(identifier + str(uuid.uuid4())[:5],
+                               files=[fname],
+                               metadata=md)
+                except requests.exceptions.HTTPError as e:
+                    logger.error(f'Error with video: {video}')
+                    logger.exception(e)
 
             status_code = r[0].status_code
             if status_code == 200:
