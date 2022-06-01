@@ -80,7 +80,7 @@ def archive_yt_channel(skip_list=None):
             'collection':
             'opensource_movies',
             'title':
-            identifier,
+            video['title'],
             'mediatype':
             'movies',
             'description':
