@@ -1,37 +1,53 @@
-## Welcome to GitHub Pages
+# YouTube-Archive-Sync
 
-You can use the [editor on GitHub](https://github.com/Alyetama/yt-archive-sync/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+GitHub Action to archive YouTube channels by uploading their videos to [archive.org](https://archive.org).
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Getting Started
 
-### Markdown
+**1. [Fork this repository](https://github.com/Alyetama/yt-archive-sync/fork).**
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+**2. Create a database:**
+  - **Option 1:**  MongoDB (recommended).
+    - Self-hosted (see: [Alyetama/quick-MongoDB](https://github.com/Alyetama/quick-MongoDB) or [dockerhub image](https://hub.docker.com/_/mongo)).
+    - Free database on [Atlas](https://www.mongodb.com/database/free).
+  - **Option 2:** JSON bin (if you want a quick start).
+    - Sign up to JSONBin [here](https://jsonbin.io/login).
+    - Click on `VIEW MASTER KEY`, then copy the key.
 
-```markdown
-Syntax highlighted code block
+**3. Add your *Archive.org* credentials to the repository's *Actions* secrets:**
 
-# Header 1
-## Header 2
-### Header 3
+  - `ARCHIVE_USERNAME`
+  - `ARCHIVE_PASSWORD`
 
-- Bulleted
-- List
+**4. Add a list of the channels you want to archive to the repository's *Actions* secrets:**
 
-1. Numbered
-2. List
+The `CHANNELS` secret should be formatted like this example:
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+```
+CHANNEL_NAME: CHANNEL_URL
+FOO: CHANNEL_URL
+FOOBAR: CHANNEL_URL
+SOME_CHANNEL: CHANNEL_URL
 ```
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+Don't add any quotes around the name or the URL, and make sure to keep one space between the colon and the URL.
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Alyetama/yt-archive-sync/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+**5. Add the database secret(s) to the repository's *Actions* secrets:**
 
-### Support or Contact
+If you picked **option 1 (MongoDB)**, add this additional secret:
+  - `MONGODB_CONNECTION_STRING`
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+If you picked **option 2 (JSON bin)**, add this additional secret:
+  - `JSONBIN_KEY`  
+
+
+**6. Run the workflow under `Actions` manually with a `workflow_dispatch`, or wait for it to run automatically.**
+
+That's it!
+
+
+## Notes
+
+- Information about the `MONGODB_CONNECTION_STRING` can be found [here](https://www.mongodb.com/docs/manual/reference/connection-string/).
+- Jobs can run for a maximum of 6 hours, so if you're archiving a large channel, the job might die, but it will resume in a new job when it's scheduled to run.
