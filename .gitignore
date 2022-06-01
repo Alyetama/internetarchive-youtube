@@ -192,3 +192,4 @@ Temporary Items
 logs/
 *.out
 *.json
+channels.txt
