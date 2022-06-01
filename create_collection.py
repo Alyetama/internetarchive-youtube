@@ -51,7 +51,8 @@ def create_collection(channel_name, channel_url):
     if os.getenv('MONGODB_CONNECTION_STRING'):
         db = mongodb_client()
         logger.debug(data)
-        existing_data = list(db['DATA'].find({'_id': 1}))
+        existing_data = list(db['DATA'].distinct('_id'))
+
         for video in data:
             try:
                 db['DATA'].insert_one(video)
