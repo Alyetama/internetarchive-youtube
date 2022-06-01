@@ -31,7 +31,7 @@ FOOBAR: CHANNEL_URL
 SOME_CHANNEL: CHANNEL_URL
 ```
 
-Make you don't add any quotes and to keep one space between the colon and the URL.
+Don't add any quotes around the name or the URL, and make sure to keep one space between the colon and the URL.
 
 
 **5. Add the database secret(s) to the repository's *Actions* secrets:**
