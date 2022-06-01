@@ -45,8 +45,6 @@ python create_collection.py -c "replace_with_channel_url" \
   --jsonbin
 ```
 
-- Copy the `Bin ID` in the output.
-
 **4. Add the following secrets to the repository's *Actions* secrets:**
 
   - `ARCHIVE_USERNAME`
@@ -56,9 +54,8 @@ python create_collection.py -c "replace_with_channel_url" \
 If you're using **MongoDB (option 1)**, add this additional secret:
   - `MONGODB_CONNECTION_STRING`
 
-If you're using **JSONBIN (option 2)**, add these additional secrets:
+If you're using **JSONBIN (option 2)**, add this additional secret:
   - `JSONBIN_KEY`  
-  - `JSONBIN_ID`
 
 
 **5. Run the workflow under `Actions` manually with a `workflow_dispatch` or wait for it to run automatically.**
@@ -70,6 +67,4 @@ That's it!
 
 - Information about the `MONGODB_CONNECTION_STRING` can be found [here](https://www.mongodb.com/docs/manual/reference/connection-string/).
 - `CHANNEL_NAME` is the name of the channel you want to sync.
-- If want to download another channel, run the `create_collection.py` line again, then replace the `CHANNEL_NAME` secret value.
-  - If you're using JSONBIN: Repace the `JSONBIN_ID` secret value as well.
-
+- If want to download another channel, simply run the `create_collection.py` line again, then replace the `CHANNEL_NAME` secret value.

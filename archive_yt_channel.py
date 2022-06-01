@@ -26,9 +26,10 @@ def archive_yt_channel(channel_name, skip_list=None):
         data = list(db[channel_name].find({}))
         mongodb = True
 
-    elif os.getenv('JSONBIN_KEY') and os.getenv('JSONBIN_ID'):
-        jb = JSONBin(os.getenv('JSONBIN_KEY'), os.getenv('JSONBIN_ID'))
-        data = jb.api_request().json()['record']
+    elif os.getenv('JSONBIN_KEY'):
+        jb = JSONBin(channel_name, jsonbin_key)
+        bin_id = jb.handle_collection_bins()
+        data = jb.read_bin(bin_id)['record']
         jsonbin = True
 
     for video in tqdm(data):
@@ -62,7 +63,7 @@ def archive_yt_channel(channel_name, skip_list=None):
                                        }})
                     elif jsonbin:
                         video['downloaded'] = True
-                        jb.update_bin(video)
+                        jb.update_bin(bin_id, data)
                 except yt_dlp.utils.DownloadError as e:
                     logger.exception(e)
                     continue
@@ -89,7 +90,7 @@ def archive_yt_channel(channel_name, skip_list=None):
                     col.update_one({'_id': _id}, {'$set': {'uploaded': True}})
                 elif jsonbin:
                     video['uploaded'] = True
-                    jb.update_bin(video)
+                    jb.update_bin(bin_id, data)
                 Path(fname).unlink()
             else:
                 logger.error(

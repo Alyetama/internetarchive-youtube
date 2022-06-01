@@ -62,14 +62,10 @@ def create_collection(channel_url, channel_name, mongodb=True, jsonbin=False):
         db[channel_name].insert_many(data)
 
     elif jsonbin:
-        jb = JSONBin(bin_id=None, verbose=True)
-        resp = jb.api_request(method='post',
-                              data=data,
-                              channel_name=channel_name)
-        bin_id = resp.json()['metadata']['id']
+        jb = JSONBin(channel_name, os.getenv('JSONBIN_KEY'))
+        _ = jb.handle_collection_bins(channel_name, include_data=data)
 
-        print(f'Bin ID: {bin_id}')
-        return bin_id
+    return data
 
 
 if __name__ == '__main__':

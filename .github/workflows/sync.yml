@@ -31,7 +31,6 @@ jobs:
         CHANNEL_NAME: ${{ secrets.CHANNEL_NAME }}
         MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
-        JSONBIN_ID: ${{ secrets.JSONBIN_ID }}
       run: |
         ia configure --username="$ARCHIVE_USERNAME" --password="$ARCHIVE_PASSWORD"
         python archive_yt_channel.py "$CHANNEL_NAME"

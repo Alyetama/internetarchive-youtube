@@ -4,51 +4,73 @@
 import os
 
 import requests
-from loguru import logger
 
 
 class JSONBin:
 
-    def __init__(self,
-                 jsonbin_key=os.getenv('JSONBIN_KEY'),
-                 bin_id=os.getenv('JSONBIN_ID'),
-                 verbose=False):
+    def __init__(self, channel_name, jsonbin_key):
+        self.channel_name = channel_name
         self.jsonbin_key = jsonbin_key
-        self.bin_id = bin_id
-        self.verbose = verbose
 
-    def api_request(self, method=None, data=None):
+    def handle_collection_bins(self, include_data=None):
+        url = 'https://api.jsonbin.io/v3'
+
         headers = {
-            'Content-Type': 'application/json',
-            'X-Master-Key': os.getenv('JSONBIN_KEY')
+            'X-Collection-Name': 'yt_archive_sync_collection',
+            'X-Master-Key': self.jsonbin_key
         }
+        data = {}
 
-        if self.bin_id:
-            url = f'https://api.jsonbin.io/v3/b/{self.bin_id}'
+        # CREATE A COLLECTION
+
+        resp = requests.post(f'{url}/c', json=data, headers=headers).json()
+        if resp.get('record'):
+            collection_id = resp['record']
         else:
-            url = 'https://api.jsonbin.io/v3/b/'
-            headers.update({'X-Bin-Name': 'yt_archive_sync'})
+            resp = requests.get(f'{url}/c', json=data, headers=headers)
+            collection_id = resp.json()[0]['record']
 
-        if self.verbose:
-            logger.debug(f'Request: {url} {data}')
+        # LIST THE BINS OF THE COLLECTION
 
-        if method == 'post':
-            resp = requests.post(url, json=data, headers=headers)
-        elif method == 'put':
-            resp = requests.put(url, json=data, headers=headers)
+        resp = requests.get(f'{url}/c/{collection_id}/bins',
+                            json=data,
+                            headers=headers)
+
+        bin_id = [
+            b['record'] for b in resp.json()
+            if self.channel_name == b['snippetMeta']['name']
+        ]
+        if bin_id:
+            bin_id = bin_id[0]
         else:
-            resp = requests.get(url, headers=headers)
+            print('Creating a new bin...')
+            headers.update({
+                'X-Bin-Name': self.channel_name,
+                'Content-Type': 'application/json',
+                'X-Collection-Id': collection_id
+            })
+            if not include_data:
+                include_data = [None]
+            resp = requests.post(f'{url}/b',
+                                 json=include_data,
+                                 headers=headers)
+            bin_id = resp.json()['metadata']['id']
 
-        if self.verbose:
-            logger.debug(f'Response: {resp.json()}')
-        return resp
+        return bin_id
 
-    def update_bin(self, data):
-        read_resp = self.api_request()
-        record = read_resp.json()['record']
-        for video in record:
-            if video['_id'] == data['_id']:
-                video.update(data)
-                break
-        put_resp = self.api_request(method='put', data=record)
+    def read_bin(self, bin_id):
+        url = 'https://api.jsonbin.io/v3'
+        headers = {'X-Master-Key': self.jsonbin_key}
+        read_resp = requests.get(f'{url}/b/{bin_id}', headers=headers)
+        return read_resp.json()
+
+    def update_bin(self, bin_id, data):
+        url = 'https://api.jsonbin.io/v3'
+        headers = {
+            'X-Master-Key': self.jsonbin_key,
+            'Content-Type': 'application/json'
+        }
+        put_resp = requests.put(f'{url}/b/{bin_id}',
+                                json=data,
+                                headers=headers)
         return put_resp.json()
