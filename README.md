@@ -11,7 +11,7 @@ GitHub Action to archive YouTube channels by uploading their videos to [archive.
     - Self-hosted (see: [Alyetama/quick-MongoDB](https://github.com/Alyetama/quick-MongoDB) or [dockerhub image](https://hub.docker.com/_/mongo)).
     - Free database on [Atlas](https://www.mongodb.com/database/free).
   - **Option 2:** JSON bin (if you want a quick start).
-    - You can create a free bin on [JSONBIN.io](https://jsonbin.io/).
+    - [JSONBIN.io](https://jsonbin.io/) (see below).
 
 If you choose **option 1 (MongoDB)**, run the following code snippet on a local machine:
 
