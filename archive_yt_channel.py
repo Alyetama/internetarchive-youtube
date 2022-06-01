@@ -2,10 +2,10 @@
 # coding: utf-8
 
 import os
-import sys
 from pathlib import Path
 
 import pymongo
+import requests
 import yt_dlp
 from dotenv import load_dotenv
 from internetarchive import upload
@@ -16,18 +16,18 @@ from clean_name import clean_fname
 from jsonbin_manager import JSONBin
 
 
-def archive_yt_channel(channel_name, skip_list=None):
+def archive_yt_channel(skip_list=None):
     jsonbin, mongodb = False, False
 
     if os.getenv('MONGODB_CONNECTION_STRING'):
         client = pymongo.MongoClient(os.getenv('MONGODB_CONNECTION_STRING'))
         db = client['yt']
-        col = db[channel_name]
-        data = list(db[channel_name].find({}))
+        col = db['DATA']
+        data = list(db['DATA'].find({}))
         mongodb = True
 
     elif os.getenv('JSONBIN_KEY'):
-        jb = JSONBin(channel_name, jsonbin_key)
+        jb = JSONBin(jsonbin_key)
         bin_id = jb.handle_collection_bins()
         data = jb.read_bin(bin_id)['record']
         jsonbin = True
@@ -65,25 +65,36 @@ def archive_yt_channel(channel_name, skip_list=None):
                         video['downloaded'] = True
                         jb.update_bin(bin_id, data)
                 except yt_dlp.utils.DownloadError as e:
+                    logger.error(f'Error with video: {video}')
                     logger.exception(e)
                     continue
 
         publish_date = f'{y}-{m}-{d} 00:00:00'
 
-        identifier = f'{y}-{m}-{d}_{channel_name}'
+        identifier = f'{y}-{m}-{d}_{video["channel_name"]}'
         left_len = 80 - (len(identifier) + 1)
         identifier = f'{identifier}_{clean_name[:left_len]}'
 
         md = {
-            'collection': 'opensource_movies',
-            'title': identifier,
-            'mediatype': 'movies',
+            'collection':
+            'opensource_movies',
+            'title':
+            identifier,
+            'mediatype':
+            'movies',
             'description':
-            f'Title: {video["title"]}\nPublished on: {publish_date}'
+            f'Title: {video["title"]}\nPublished on: {publish_date}\n'
+            f'Original video URL: {video["url"]}'
         }
 
         if not video['uploaded']:
-            r = upload(identifier, files=[fname], metadata=md)
+            try:
+                r = upload(identifier, files=[fname], metadata=md)
+            except requests.exceptions.HTTPError as e:
+                logger.error(f'Error with video: {video}')
+                logger.exception(e)
+                continue
+
             status_code = r[0].status_code
             if status_code == 200:
                 if mongodb:
@@ -99,4 +110,4 @@ def archive_yt_channel(channel_name, skip_list=None):
 
 if __name__ == '__main__':
     load_dotenv()
-    archive_yt_channel(channel_name=sys.argv[1])
+    archive_yt_channel()
