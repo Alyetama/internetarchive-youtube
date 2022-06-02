@@ -75,10 +75,9 @@ def archive_yt_channel(skip_list: list = None) -> None:
                 logger.error(f'❌ Error with video: {video}')
                 logger.error(f'❌ ERROR message: {e}')
                 logger.debug('Trying again with no format specification...')
-                ydl_opts.pop('format')
 
                 try:
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    with yt_dlp.YoutubeDL({'outtmpl': fname}) as ydl:
                         ydl.download(video['url'])
                 except yt_dlp.utils.DownloadError as e:
                     logger.error(f'❌ Failed again! ERROR message: {e}')
@@ -100,18 +99,24 @@ def archive_yt_channel(skip_list: list = None) -> None:
         left_len = 80 - (len(identifier) + 1)
         identifier = f'{identifier}_{clean_name[:left_len]}'
 
+        custom_fields = {
+            k: v
+            for k, v in video.items()
+            if k not in ['_id', 'downloaded', 'uploaded']
+        }
         md = {
             'collection':
             'opensource_movies',
-            'title':
-            video['title'],
             'mediatype':
             'movies',
             'description':
             f'Title: {video["title"]}\nPublished on: {publish_date}\n'
             f'Original video URL: {video["url"]}',
             'subject':
-            video['channel_name']
+            video['channel_name'],
+            'id':
+            _id,
+            **custom_fields
         }
 
         if not video['uploaded']:

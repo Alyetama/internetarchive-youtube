@@ -124,7 +124,7 @@ def main():
     channels = [x.split(': ') for x in channels.strip().split('\n')]
 
     for channel in channels:
-        print(f'Current channel: {channel}')
+        logger.debug(f'Current channel: {channel}')
         _ = create_collection(
             channel_name=channel[0],
             channel_url=channel[1],
