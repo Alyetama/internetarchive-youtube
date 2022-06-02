@@ -16,7 +16,7 @@ GitHub Action to archive YouTube channels by uploading their videos to [archive.
 
 **3. Add your *Archive.org* credentials to the repository's *Actions* secrets:**
 
-  - `ARCHIVE_USERNAME`
+  - `ARCHIVE_USER_EMAIL`
   - `ARCHIVE_PASSWORD`
 
 **4. Add a list of the channels you want to archive to the repository's *Actions* secrets:**

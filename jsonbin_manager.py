@@ -4,6 +4,10 @@
 import requests
 
 
+class NoDataToInclude(Exception):
+    pass
+
+
 class JSONBin:
 
     def __init__(self, jsonbin_key):
@@ -42,6 +46,8 @@ class JSONBin:
             bin_id = bin_id[0]
         else:
             # If not (first run), create a bin with the initial data
+            if not include_data:
+                raise NoDataToInclude
             print('Creating a new bin...')
             headers.update({
                 'X-Bin-Name': 'DATA',

@@ -14,21 +14,21 @@ def clean_fname(file_name):
 
     fname = Path(file_name).name
 
-    matches = re.search(r'\s\[(?<=\[).+?(?=\])\]', fname)
+    matches = re.search(r'\s\[(?<=\[).+?(?=\])\]', fname)  # noqa
     if matches:
         fname = fname.replace(matches[0], '')
     fname = re.sub(' {2,}', ' ', fname)
 
-    clean_fname = ''.join([
+    clean_name = ''.join([
         x if x not in illegal and x in string.printable else '-' for x in fname
     ])
-    clean_fname = re.sub('-{2,}', '-', clean_fname)
+    clean_name = re.sub('-{2,}', '-', clean_name)
 
-    if clean_fname.endswith('-'):
-        clean_fname = clean_fname[:-1]
+    if clean_name.endswith('-'):
+        clean_name = clean_name[:-1]
 
-    clean_fname = f'{clean_fname}.mp4'
-    return clean_fname
+    clean_name = f'{clean_name}.mp4'
+    return clean_name
 
 
 if __name__ == '__main__':
