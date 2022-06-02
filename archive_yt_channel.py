@@ -65,7 +65,7 @@ def archive_yt_channel(skip_list=None):
 
         if not video['downloaded']:
             logger.debug(f'🚀 (CURRENT DOWNLOAD) -> File: {fname}; YT title: '
-                         f'{video["title"]}; YT URL: {video["URL"]}')
+                         f'{video["title"]}; YT URL: {video["url"]}')
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 try:
@@ -102,19 +102,21 @@ def archive_yt_channel(skip_list=None):
             f'Original video URL: {video["url"]}'
         }
 
-        logger.debug(f'Upload metadata: {md}')
-
         if not video['uploaded']:
+            logger.debug(f'Upload metadata: {md}')
             identifier = identifier.replace(' ', '').strip()
             cur_metadata = get_item(identifier).item_metadata
             if cur_metadata.get('metadata'):
                 archive_email = os.getenv('ARCHIVE_USER_EMAIL')
                 if cur_metadata['metadata']['uploader'] != archive_email:
                     identifier = str(uuid.uuid4())
+                else:
+                    logger.debug(f'{_id} is already uploaded...')
+                    return
 
             logger.debug(f'🚀 (CURRENT UPLOAD) -> File: {fname}; Identifier: '
                          f'{identifier}; YT title: {video["title"]}; YT URL: '
-                         f'{video["URL"]}')
+                         f'{video["url"]}')
 
             try:
                 r = upload(identifier, files=[fname], metadata=md)
