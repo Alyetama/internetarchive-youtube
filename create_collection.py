@@ -29,6 +29,17 @@ def info_cmd(channel_url, playlist_end=''):
            '"downloaded": false, "uploaded": false}, \' ' + f'"{channel_url}"'
 
 
+def append_data(data):
+    for video in data:
+        _id = video['url'].split('watch?v=')[1]
+        video.update({
+            '_id': _id,
+            'channel_name': channel_name,
+            'channel_url': channel_url
+        })
+    return data
+
+
 def create_collection(channel_name, channel_url):
     existing_data = []
     existing_ids = []
@@ -58,14 +69,7 @@ def create_collection(channel_name, channel_url):
                                 capture_output=True,
                                 text=True)
     data = json.loads(f'[{p_last_ten.stdout.strip()[:-1]}]')
-
-    for video in data:
-        _id = video['url'].split('watch?v=')[1]
-        video.update({
-            '_id': _id,
-            'channel_name': channel_name,
-            'channel_url': channel_url
-        })
+    data = append_data(data)
 
     last_ten_ids = [x['_id'] for x in data]
 
@@ -74,9 +78,9 @@ def create_collection(channel_name, channel_url):
         return
     else:
         data = [x for x in data if x['_id'] not in existing_ids]
-        logger.debug(f'Found {len(data)} new videos...')
         if 10 > len(data):
             skip_full_download = True
+            logger.debug(f'Found {len(data)} new videos...')
 
     if not skip_full_download:
         logger.debug(
@@ -89,6 +93,7 @@ def create_collection(channel_name, channel_url):
                            capture_output=True,
                            text=True)
         data = json.loads(f'[{p.stdout.strip()[:-1]}]')
+        data = append_data(data)
 
     data = [dict(x) for x in {tuple(d.items()) for d in data}]
 
