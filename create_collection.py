@@ -92,6 +92,9 @@ def create_collection(channel_name, channel_url):
 
     data = [dict(x) for x in {tuple(d.items()) for d in data}]
 
+    if not data:
+        return
+
     with open(f'{channel_name}_channel.json', 'w') as j:
         json.dump(data, j, indent=4)
 
