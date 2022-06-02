@@ -193,3 +193,7 @@ logs/
 *.out
 *.json
 channels.txt
+debugging.py
+*.part*
+*.webm
+*.mp4

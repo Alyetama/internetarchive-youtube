@@ -26,12 +26,12 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Run main app
       env:
-        ARCHIVE_USERNAME: ${{ secrets.ARCHIVE_USERNAME }}
+        ARCHIVE_USER_EMAIL: ${{ secrets.ARCHIVE_USER_EMAIL }}
         ARCHIVE_PASSWORD: ${{ secrets.ARCHIVE_PASSWORD }}
         CHANNELS: ${{ secrets.CHANNELS }}
         MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
       run: |
-        ia configure --username="$ARCHIVE_USERNAME" --password="$ARCHIVE_PASSWORD"
+        ia configure --username="$ARCHIVE_USER_EMAIL" --password="$ARCHIVE_PASSWORD"
         python create_collection.py
         python archive_yt_channel.py

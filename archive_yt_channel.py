@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os
+import time
 import uuid
 from pathlib import Path
 
@@ -9,12 +10,16 @@ import pymongo
 import requests
 import yt_dlp
 from dotenv import load_dotenv
-from internetarchive import upload
+from internetarchive import get_item, upload
 from loguru import logger
 from tqdm import tqdm
 
 from clean_name import clean_fname
 from jsonbin_manager import JSONBin
+
+
+class NoStorageSecretFound(Exception):
+    pass
 
 
 def archive_yt_channel(skip_list=None):
@@ -28,10 +33,15 @@ def archive_yt_channel(skip_list=None):
         mongodb = True
 
     elif os.getenv('JSONBIN_KEY'):
-        jb = JSONBin(jsonbin_key)
+        jb = JSONBin(os.getenv('JSONBIN_KEY'))
         bin_id = jb.handle_collection_bins()
         data = jb.read_bin(bin_id)['record']
         jsonbin = True
+
+    else:
+        raise NoStorageSecretFound('You need at least one storage secret ('
+                                   '`MONGODB_CONNECTION_STRING` or '
+                                   '`JSONBIN_KEY`!')
 
     for video in tqdm(data):
 
@@ -54,19 +64,23 @@ def archive_yt_channel(skip_list=None):
                 video['downloaded'] = False
 
         if not video['downloaded']:
+            logger.debug(f'🚀 (CURRENT DOWNLOAD) -> File: {fname}; YT title: '
+                         f'{video["title"]}; YT URL: {video["URL"]}')
+
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 try:
                     ydl.download(video['url'])
                     if mongodb:
-                        col.update_one({'_id': _id},
-                                       {'$set': {
-                                           'downloaded': True
-                                       }})
+                        col.update_one(  # noqa
+                            {'_id': _id}, {'$set': {
+                                'downloaded': True
+                            }})
                     elif jsonbin:
                         video['downloaded'] = True
-                        jb.update_bin(bin_id, data)
+                        jb.update_bin(bin_id, data)  # noqa
                 except yt_dlp.utils.DownloadError as e:
                     logger.error(f'Error with video: {video}')
+                    logger.error(f'{">" * 40} ERROR message: {e}')
                     logger.exception(e)
                     continue
 
@@ -88,22 +102,41 @@ def archive_yt_channel(skip_list=None):
             f'Original video URL: {video["url"]}'
         }
 
+        logger.debug(f'Upload metadata: {md}')
+
         if not video['uploaded']:
             identifier = identifier.replace(' ', '').strip()
+            cur_metadata = get_item(identifier).item_metadata
+            if cur_metadata.get('metadata'):
+                archive_email = os.getenv('ARCHIVE_USER_EMAIL')
+                if cur_metadata['metadata']['uploader'] != archive_email:
+                    identifier = str(uuid.uuid4())
+
+            logger.debug(f'🚀 (CURRENT UPLOAD) -> File: {fname}; Identifier: '
+                         f'{identifier}; YT title: {video["title"]}; YT URL: '
+                         f'{video["URL"]}')
+
             try:
                 r = upload(identifier, files=[fname], metadata=md)
             except requests.exceptions.HTTPError as e:
-                try:
-                    logger.error(e)
-                    r = upload(str(uuid.uuid4()),
-                               files=[fname],
-                               metadata=md)
-                except requests.exceptions.HTTPError as e:
+                if 'Slow Down' in str(e) or 'reduce your request rate' in str(
+                        e):
                     logger.error(f'Error with video: {video}')
-                    logger.exception(e)
-                    continue
+                    logger.error(f'{">" * 40} ERROR message: {e}')
+                    logger.debug('Sleeping for 120 seconds...')
+                    time.sleep(120)
+                    logger.debug('Trying to upload again...')
 
-            status_code = r[0].status_code
+                    try:
+                        r = upload(identifier, files=[fname], metadata=md)
+                    except requests.exceptions.HTTPError as e:
+                        logger.error('Failed again!')
+                        logger.error(f'{">" * 40} ERROR message: {e}')
+                        logger.exception(e)
+                        logger.debug('Skipping...')
+                        continue
+
+            status_code = r[0].status_code  # noqa
             if status_code == 200:
                 if mongodb:
                     col.update_one({'_id': _id}, {'$set': {'uploaded': True}})
@@ -112,8 +145,9 @@ def archive_yt_channel(skip_list=None):
                     jb.update_bin(bin_id, data)
                 Path(fname).unlink()
             else:
+                logger.error(f'Could not upload {video}!')
                 logger.error(
-                    f'Error uploading {video} (status code: {status_code})')
+                    f'{">" * 40} Status code error with video: {video}')
 
 
 if __name__ == '__main__':
