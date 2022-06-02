@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Optional
 
 import pymongo
+import requests
 from dotenv import load_dotenv
 from loguru import logger
 from pymongo.database import Database
@@ -28,8 +29,7 @@ class CreateCollection:
         self.channel_url = channel_url
 
     @staticmethod
-    def mongodb_client(
-            return_names: bool = False) -> Database:
+    def mongodb_client(return_names: bool = False) -> Database:
         client = pymongo.MongoClient(os.getenv('MONGODB_CONNECTION_STRING'))
         db = client['yt']
         if return_names:
@@ -63,8 +63,8 @@ class CreateCollection:
                 _id = Path(video['url']).stem
             video.update({
                 '_id': _id,  # noqa
-                'self.channel_name': self.channel_name,
-                'self.channel_url': self.channel_url
+                'channel_name': self.channel_name,
+                'channel_url': self.channel_url
             })
         return data
 
@@ -102,7 +102,8 @@ class CreateCollection:
         last_ten_ids = [x['_id'] for x in data]
 
         if all(True if x in last_ten_ids else False for x in existing_ids):
-            print(f'{self.channel_name} is up-to-date! Nothing to do...')
+            logger.debug(
+                f'{self.channel_name} is up-to-date! Nothing to do...')
             return
         else:
             data = [x for x in data if x['_id'] not in existing_ids]
@@ -154,7 +155,21 @@ class CreateCollection:
 
 def main() -> None:
     channels = os.getenv('CHANNELS')
-    channels = [x.split(': ') for x in channels.strip().split('\n')]
+    if not channels:
+        raise TypeError('`CHANNELS` cannot be empty!')
+
+    if channels.startswith('http'):
+        channels = requests.get(channels).text
+
+    elif Path(channels).exists():
+        with open(channels) as f:
+            channels = f.read()
+
+    try:
+        channels = json.loads(channels).items()
+    except json.decoder.JSONDecodeError:
+        channels = [tuple(x.split(': ')) for x in channels.strip().split('\n')]
+
     random.shuffle(channels)
 
     for channel in channels:
