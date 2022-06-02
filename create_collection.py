@@ -6,6 +6,7 @@ import os
 import random
 import shlex
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -184,4 +185,6 @@ def main() -> None:
 
 if __name__ == '__main__':
     load_dotenv()
+    if '--no-logs' in sys.argv:
+        logger.remove()
     main()
