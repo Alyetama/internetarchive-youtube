@@ -5,12 +5,17 @@ import json
 import os
 import shlex
 import subprocess
+from pathlib import Path
 
 import pymongo
 from dotenv import load_dotenv
 from loguru import logger
 
 from jsonbin_manager import JSONBin, NoDataToInclude
+
+
+class InvalidChannelURLFormat(Exception):
+    pass
 
 
 def mongodb_client(return_names=False):
@@ -22,16 +27,29 @@ def mongodb_client(return_names=False):
 
 
 def info_cmd(channel_url, playlist_end=''):
-    return f'yt-dlp {playlist_end} --get-filename -o ' \
+    if 'youtube' in channel_url.lower():
+        base_url = 'https://www.youtube.com/watch?v='
+    if 'twitch' in channel_url.lower():
+        if '/videos' not in channel_url:
+            raise InvalidChannelURLFormat(
+                'The format of the channel URL is invalid! Example of a '
+                'valid URL: https://www.twitch.tv/foobar0228/videos')
+        base_url = 'https://www.twitch.tv/videos/'
+
+    cmd = f'yt-dlp {playlist_end} --get-filename -o ' \
            '\'{"upload_date": "%(upload_date)s", ' \
            '"title": "%(title)s", "url": ' \
-           '"https://www.youtube.com/watch?v=%(id)s", ' \
+           f'"{base_url}%(id)s", ' \
            '"downloaded": false, "uploaded": false}, \' ' + f'"{channel_url}"'
+    return cmd
 
 
 def append_data(data, channel_name, channel_url):
     for video in data:
-        _id = video['url'].split('watch?v=')[1]
+        if 'youtube' in video['url']:
+            _id = video['url'].split('watch?v=')[1]
+        elif 'twitch' in video['url']:
+            _id = Path(video['url']).stem
         video.update({
             '_id': _id,
             'channel_name': channel_name,
