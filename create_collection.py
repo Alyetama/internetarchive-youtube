@@ -29,7 +29,7 @@ def info_cmd(channel_url, playlist_end=''):
            '"downloaded": false, "uploaded": false}, \' ' + f'"{channel_url}"'
 
 
-def append_data(data):
+def append_data(data, channel_name, channel_url):
     for video in data:
         _id = video['url'].split('watch?v=')[1]
         video.update({
@@ -69,7 +69,7 @@ def create_collection(channel_name, channel_url):
                                 capture_output=True,
                                 text=True)
     data = json.loads(f'[{p_last_ten.stdout.strip()[:-1]}]')
-    data = append_data(data)
+    data = append_data(data, channel_name, channel_url)
 
     last_ten_ids = [x['_id'] for x in data]
 
@@ -93,7 +93,7 @@ def create_collection(channel_name, channel_url):
                            capture_output=True,
                            text=True)
         data = json.loads(f'[{p.stdout.strip()[:-1]}]')
-        data = append_data(data)
+        data = append_data(data, channel_name, channel_url)
 
     data = [dict(x) for x in {tuple(d.items()) for d in data}]
 
