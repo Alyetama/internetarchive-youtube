@@ -46,7 +46,7 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
                                    '`MONGODB_CONNECTION_STRING` or '
                                    '`JSONBIN_KEY`!')
 
-    data = random.shuffle(data)
+    random.shuffle(data)
 
     for video in tqdm(data):
 
