@@ -80,9 +80,8 @@ def archive_yt_channel(skip_list: list = None) -> None:
                         video['downloaded'] = True
                         jb.update_bin(bin_id, data)  # noqa
                 except yt_dlp.utils.DownloadError as e:
-                    logger.error(f'Error with video: {video}')
-                    logger.error(f'{">" * 40} ERROR message: {e}')
-                    logger.exception(e)
+                    logger.error(f'❌ Error with video: {video}')
+                    logger.error(f'❌ ERROR message: {e}')
                     continue
 
         publish_date = f'{y}-{m}-{d} 00:00:00'
@@ -124,20 +123,26 @@ def archive_yt_channel(skip_list: list = None) -> None:
             except requests.exceptions.HTTPError as e:
                 if 'Slow Down' in str(e) or 'reduce your request rate' in str(
                         e):
-                    logger.error(f'Error with video: {video}')
-                    logger.error(f'{">" * 40} ERROR message: {e}')
-                    logger.debug('Sleeping for 120 seconds...')
-                    time.sleep(120)
+                    logger.error(f'❌ Error with video: {video}')
+                    logger.error(f'❌ ERROR message: {e}')
+                    logger.debug('Sleeping for 60 seconds...')
+                    time.sleep(60)
                     logger.debug('Trying to upload again...')
 
                     try:
                         r = upload(identifier, files=[fname], metadata=md)
                     except requests.exceptions.HTTPError as e:
-                        logger.error('Failed again!')
-                        logger.error(f'{">" * 40} ERROR message: {e}')
-                        logger.exception(e)
-                        logger.debug('Skipping...')
-                        continue
+                        logger.error('❌ Failed again!')
+                        logger.error(f'❌ ERROR message: {e}')
+
+                        try:
+                            identifier = str(uuid.uuid4())
+                            r = upload(identifier, files=[fname], metadata=md)
+                        except requests.exceptions.HTTPError as e:
+                            logger.error(f'❌ ERROR message: {e}')
+                            logger.error(
+                                '❌ Failed all attempts to upload! Skipping...')
+                            continue
 
             status_code = r[0].status_code  # noqa
             if status_code == 200:
@@ -148,9 +153,8 @@ def archive_yt_channel(skip_list: list = None) -> None:
                     jb.update_bin(bin_id, data)
                 Path(fname).unlink()
             else:
-                logger.error(f'Could not upload {video}!')
-                logger.error(
-                    f'{">" * 40} Status code error with video: {video}')
+                logger.error(f'❌ Could not upload {video}!')
+                logger.error(f'❌ Status code error with video: {video}')
     return
 
 
