@@ -3,6 +3,7 @@
 
 import os
 import random
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -69,7 +70,13 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
         title = f'{y}-{m}-{d}__{clean_name}'
         fname = f'{title}.mp4'
 
-        ydl_opts = {'format': 'mp4/bestaudio+bestvideo', 'outtmpl': fname}
+        ydl_opts = {
+            'format': 'mp4/bestaudio+bestvideo',
+            'outtmpl': fname,
+            'quiet': True,
+            'no-warnings': True,
+            'no-progress': True
+        }
 
         if video['downloaded'] and not video['uploaded']:
             if not Path(fname).exists():
@@ -96,10 +103,7 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
                     continue
 
             if mongodb:
-                col.update_one(
-                    {'_id': _id}, {'$set': {
-                        'downloaded': True
-                    }})
+                col.update_one({'_id': _id}, {'$set': {'downloaded': True}})
             elif jsonbin:
                 video['downloaded'] = True
                 jb.update_bin(bin_id, data)
@@ -191,4 +195,6 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
 
 if __name__ == '__main__':
     load_dotenv()
+    if '--no-logs' in sys.argv:
+        logger.remove()
     archive_yt_channel()
