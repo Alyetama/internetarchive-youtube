@@ -68,21 +68,31 @@ def archive_yt_channel(skip_list: list = None) -> None:
             logger.debug(f'🚀 (CURRENT DOWNLOAD) -> File: {fname}; YT title: '
                          f'{video["title"]}; YT URL: {video["url"]}')
 
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                try:
+            try:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     ydl.download(video['url'])
-                    if mongodb:
-                        col.update_one(  # noqa
-                            {'_id': _id}, {'$set': {
-                                'downloaded': True
-                            }})
-                    elif jsonbin:
-                        video['downloaded'] = True
-                        jb.update_bin(bin_id, data)  # noqa
+            except yt_dlp.utils.DownloadError as e:
+                logger.error(f'❌ Error with video: {video}')
+                logger.error(f'❌ ERROR message: {e}')
+                logger.debug('Trying again with no format specification...')
+                ydl_opts.pop('format')
+
+                try:
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.download(video['url'])
                 except yt_dlp.utils.DownloadError as e:
-                    logger.error(f'❌ Error with video: {video}')
-                    logger.error(f'❌ ERROR message: {e}')
+                    logger.error(f'❌ Failed again! ERROR message: {e}')
+                    logger.error(f'❌ Skipping ({video["url"]})...')
                     continue
+
+            if mongodb:
+                col.update_one(  # noqa
+                    {'_id': _id}, {'$set': {
+                        'downloaded': True
+                    }})
+            elif jsonbin:
+                video['downloaded'] = True
+                jb.update_bin(bin_id, data)  # noqa
 
         publish_date = f'{y}-{m}-{d} 00:00:00'
 
