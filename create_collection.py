@@ -3,6 +3,7 @@
 
 import json
 import os
+import random
 import shlex
 import subprocess
 from pathlib import Path
@@ -145,6 +146,7 @@ def create_collection(channel_name, channel_url):
 def main():
     channels = os.getenv('CHANNELS')
     channels = [x.split(': ') for x in channels.strip().split('\n')]
+    channels = random.shuffle(channels)
 
     for channel in channels:
         logger.debug(f'Current channel: {channel}')

@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os
+import random
 import time
 import uuid
 from pathlib import Path
@@ -44,6 +45,8 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
         raise NoStorageSecretFound('You need at least one storage secret ('
                                    '`MONGODB_CONNECTION_STRING` or '
                                    '`JSONBIN_KEY`!')
+
+    data = random.shuffle(data)
 
     for video in tqdm(data):
 
