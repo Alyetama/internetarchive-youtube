@@ -5,6 +5,7 @@ import os
 import time
 import uuid
 from pathlib import Path
+from typing import Optional
 
 import pymongo
 import requests
@@ -22,7 +23,7 @@ class NoStorageSecretFound(Exception):
     pass
 
 
-def archive_yt_channel(skip_list: list = None) -> None:
+def archive_yt_channel(skip_list: Optional[list] = None) -> None:
     jsonbin = False
     mongodb = False
 
@@ -46,7 +47,7 @@ def archive_yt_channel(skip_list: list = None) -> None:
 
     for video in tqdm(data):
 
-        _id = video['url'].split('watch?v=')[1]
+        _id = video['_id']
         if skip_list:
             if _id in skip_list:
                 logger.debug(f'Skipped {video} (skip list)...')
