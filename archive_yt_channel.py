@@ -99,7 +99,9 @@ def archive_yt_channel(skip_list: list = None) -> None:
             'movies',
             'description':
             f'Title: {video["title"]}\nPublished on: {publish_date}\n'
-            f'Original video URL: {video["url"]}'
+            f'Original video URL: {video["url"]}',
+            'subject':
+            video['channel_name']
         }
 
         if not video['uploaded']:
