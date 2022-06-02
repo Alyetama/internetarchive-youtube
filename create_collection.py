@@ -61,6 +61,9 @@ class CreateCollection:
                 _id = video['url'].split('watch?v=')[1]
             elif 'twitch' in video['url']:
                 _id = Path(video['url']).stem
+                if _id.startswith('v'):
+                    _id = _id[1:]
+                    video['url'] = str(Path(video['url']).parent / _id)
             video.update({
                 '_id': _id,  # noqa
                 'channel_name': self.channel_name,
