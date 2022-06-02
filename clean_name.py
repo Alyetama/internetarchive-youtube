@@ -26,8 +26,6 @@ def clean_fname(file_name):
 
     if clean_name.endswith('-'):
         clean_name = clean_name[:-1]
-
-    clean_name = f'{clean_name}.mp4'
     return clean_name
 
 
