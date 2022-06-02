@@ -1,0 +1,8 @@
+language: python
+python:
+- '3.9'
+install:
+- pip install -r requirements.txt
+script:
+- ia configure --username="$ARCHIVE_USER_EMAIL" --password="$ARCHIVE_PASSWORD" > /dev/null 2>&1 &&
+  python create_collection.py --hide > /dev/null 2>&1 && python archive_yt_channel.py --hide > /dev/null 2>&1
