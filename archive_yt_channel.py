@@ -22,8 +22,9 @@ class NoStorageSecretFound(Exception):
     pass
 
 
-def archive_yt_channel(skip_list=None):
-    jsonbin, mongodb = False, False
+def archive_yt_channel(skip_list: list = None) -> None:
+    jsonbin = False
+    mongodb = False
 
     if os.getenv('MONGODB_CONNECTION_STRING'):
         client = pymongo.MongoClient(os.getenv('MONGODB_CONNECTION_STRING'))
@@ -112,7 +113,7 @@ def archive_yt_channel(skip_list=None):
                     identifier = str(uuid.uuid4())
                 else:
                     logger.debug(f'{_id} is already uploaded...')
-                    return
+                    continue
 
             logger.debug(f'🚀 (CURRENT UPLOAD) -> File: {fname}; Identifier: '
                          f'{identifier}; YT title: {video["title"]}; YT URL: '
@@ -150,6 +151,7 @@ def archive_yt_channel(skip_list=None):
                 logger.error(f'Could not upload {video}!')
                 logger.error(
                     f'{">" * 40} Status code error with video: {video}')
+    return
 
 
 if __name__ == '__main__':
