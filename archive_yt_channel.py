@@ -24,7 +24,7 @@ class NoStorageSecretFound(Exception):
     pass
 
 
-def archive_yt_channel(skip_list: Optional[list] = None) -> None:
+def load_data():
     jsonbin = False
     mongodb = False
 
@@ -45,8 +45,12 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
         raise NoStorageSecretFound('You need at least one storage secret ('
                                    '`MONGODB_CONNECTION_STRING` or '
                                    '`JSONBIN_KEY`!')
-
     random.shuffle(data)
+    return mongodb, jsonbin, col, bin_id, data
+
+def archive_yt_channel(skip_list: Optional[list] = None) -> None:
+
+    mongodb, jsonbin, col, bin_id, data = load_data()
 
     for video in tqdm(data):
 
@@ -176,6 +180,9 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
             else:
                 logger.error(f'❌ Could not upload {video}!')
                 logger.error(f'❌ Status code error with video: {video}')
+
+        # Update database in current loop for running concurrent jobs
+        mongodb, jsonbin, col, bin_id, data = load_data()  
     return
 
 
