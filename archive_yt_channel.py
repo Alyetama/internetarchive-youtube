@@ -34,12 +34,14 @@ def load_data():
         col = db['DATA']
         data = list(db['DATA'].find({}))
         mongodb = True
+        bin_id = None
 
     elif os.getenv('JSONBIN_KEY'):
         jb = JSONBin(os.getenv('JSONBIN_KEY'))
         bin_id = jb.handle_collection_bins()
         data = jb.read_bin(bin_id)['record']
         jsonbin = True
+        col = None
 
     else:
         raise NoStorageSecretFound('You need at least one storage secret ('
@@ -47,6 +49,7 @@ def load_data():
                                    '`JSONBIN_KEY`!')
     random.shuffle(data)
     return mongodb, jsonbin, col, bin_id, data
+
 
 def archive_yt_channel(skip_list: Optional[list] = None) -> None:
 
@@ -93,13 +96,13 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
                     continue
 
             if mongodb:
-                col.update_one(  # noqa
+                col.update_one(
                     {'_id': _id}, {'$set': {
                         'downloaded': True
                     }})
             elif jsonbin:
                 video['downloaded'] = True
-                jb.update_bin(bin_id, data)  # noqa
+                jb.update_bin(bin_id, data)
 
         publish_date = f'{y}-{m}-{d} 00:00:00'
 
@@ -182,7 +185,7 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
                 logger.error(f'❌ Status code error with video: {video}')
 
         # Update database in current loop for running concurrent jobs
-        mongodb, jsonbin, col, bin_id, data = load_data()  
+        mongodb, jsonbin, col, bin_id, data = load_data()
     return
 
 
