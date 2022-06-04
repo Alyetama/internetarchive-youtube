@@ -3,6 +3,7 @@
 
 import os
 import random
+import signal
 import sys
 import time
 import uuid
@@ -23,6 +24,15 @@ from jsonbin_manager import JSONBin
 
 class NoStorageSecretFound(Exception):
     pass
+
+
+class TimeLimitReached(Exception):
+    pass
+
+
+def alarm_handler(signum, _):
+    print('Signal handler called with signal', signum)
+    raise TimeLimitReached('Request is taking too long. Skipping...')
 
 
 def load_data():
@@ -197,4 +207,12 @@ if __name__ == '__main__':
     load_dotenv()
     if '--no-logs' in sys.argv:
         logger.remove()
-    archive_yt_channel()
+
+    signal.alarm(int(5.5 * 3600))
+
+    try:
+        archive_yt_channel()
+        signal.alarm(0)
+    except TimeLimitReached:
+        logger.debug('The GitHub action is about to die. Exiting...')
+        exit(0)
