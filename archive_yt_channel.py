@@ -30,12 +30,12 @@ class TimeLimitReached(Exception):
     pass
 
 
-def alarm_handler(signum, _):
+def alarm_handler(signum: int, _: object):
     print('Signal handler called with signal', signum)
     raise TimeLimitReached('Request is taking too long. Skipping...')
 
 
-def load_data():
+def load_data() -> tuple:
     jsonbin = False
     mongodb = False
 
@@ -203,16 +203,21 @@ def archive_yt_channel(skip_list: Optional[list] = None) -> None:
     return
 
 
+def main() -> None:
+    signal.signal(signal.SIGALRM, alarm_handler)
+    time_limit = int(5.5 * 3600)
+
+    try:
+        signal.alarm(time_limit)
+        archive_yt_channel()
+    except TimeLimitReached:
+        logger.debug(
+            'The GitHub action is about to die. Terminating the job safely...')
+    return
+
+
 if __name__ == '__main__':
     load_dotenv()
     if '--no-logs' in sys.argv:
         logger.remove()
-
-    signal.alarm(int(5.5 * 3600))
-
-    try:
-        archive_yt_channel()
-        signal.alarm(0)
-    except TimeLimitReached:
-        logger.debug('The GitHub action is about to die. Exiting...')
-        exit(0)
+    main()
