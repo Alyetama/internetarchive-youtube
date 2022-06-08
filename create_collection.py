@@ -15,7 +15,7 @@ import requests
 from dotenv import load_dotenv
 from loguru import logger
 from pymongo.database import Database
-
+from pymongo.errors import DuplicateKeyError
 from jsonbin_manager import JSONBin, NoDataToInclude
 
 
@@ -138,7 +138,11 @@ class CreateCollection:
 
         if os.getenv('MONGODB_CONNECTION_STRING'):
             data = [x for x in data if x['_id'] not in existing_ids]
-            db['DATA'].insert_many(data)  # noqa
+            for x in data:
+                try:
+                    db['DATA'].insert_one(x)  # noqa
+                except DuplicateKeyError:
+                    continue
 
         elif os.getenv('JSONBIN_KEY'):
             if not bin_id:
