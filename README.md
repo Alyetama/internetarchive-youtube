@@ -4,8 +4,8 @@
 
 🚀 GitHub Action and CLI to archive YouTube channels by uploading the channel's videos to [archive.org](https://archive.org).
 
-- 🧑‍💻 To use this tool as a command line interface (CLI), jump to [CLI: Getting Started](<#cli-getting-started> "CLI: Getting Started").
-- ⚡️ To use this tool as a GitHub Action, jump to [GitHub Action: Getting Started](<#github-action-getting-started> "GitHub Action: Getting Started").
+- 🧑‍💻 To use this tool as a command line interface (CLI), jump to [CLI: Getting Started](<#cli-getting-started-> "CLI: Getting Started").
+- ⚡️ To use this tool as a GitHub Action, jump to [GitHub Action: Getting Started](<#github-action-getting-started-%EF%B8%8F> "GitHub Action: Getting Started").
 
 
 ## CLI: Getting Started 🧑‍💻
