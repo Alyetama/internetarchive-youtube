@@ -65,6 +65,11 @@ class ArchiveYouTube:
             raise NoStorageSecretFound('You need at least one storage secret ('
                                        '`MONGODB_CONNECTION_STRING` or '
                                        '`JSONBIN_KEY`!')
+
+        data = [
+            x for x in data if not x['downloaded'] or not x['uploaded']
+        ]
+
         random.shuffle(data)
 
         if self.prioritize:
@@ -189,7 +194,7 @@ class ArchiveYouTube:
 
         mongodb, jsonbin, col, jb, bin_id, data = self.load_data()
 
-        for video in tqdm(data):
+        for video in tqdm(data, desc='Videos'):
 
             _id, fname, md, identifier = self.create_metadata(video)
 
