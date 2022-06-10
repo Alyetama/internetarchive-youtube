@@ -30,14 +30,14 @@ pip install internetarchive-youtube
 bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend 
 database") to track the download/upload overall progress.
 
-- If you picked **option 1 (MongoDB)**, export MongoDB connection string 
-as an environment variable:
+- If you choose **MongoDB**, export the connection string as an 
+environment variable:
 ```sh
 export MONGODB_CONNECTION_STRING=mongodb://username:password@host:port
 ```
 
-- If you picked **option 2 (JSON bin)**, export JSONBIN master key as an 
-environment variable:
+- If you choose **JSONBin**, export the master key as an environment 
+variable:
 ```sh
 export JSONBIN_KEY=xxxxxxxxxxxxxxxxx
 ```
@@ -51,25 +51,30 @@ optional arguments:
   -h, --help            show this help message and exit
   -p PRIORITIZE, --prioritize PRIORITIZE
                         Comma-separated list of channel names to 
-prioritize when processing videos
+prioritize
+                        when processing videos
   -s SKIP_LIST, --skip-list SKIP_LIST
                         Comma-separated list of channel names to skip
   -f, --force-refresh   Refresh the database after every video (Can slow 
-down the workflow significantly, but is useful when running multiple 
-concurrent
-                        jobs
+down
+                        the workflow significantly, but is useful when 
+running
+                        multiple concurrent jobs)
   -t TIMEOUT, --timeout TIMEOUT
                         Kill the job after n hours (default: 5.5)
   -n, --no-logs         Don't print any log messages
   -a, --add-channel     Add a channel interactively to the list of 
-channels to archive
+channels to
+                        archive
   -c CHANNELS_FILE, --channels-file CHANNELS_FILE
-                        Path to the channels list file to use if the 
-environment variable `CHANNELS` is not set (default: ~/.yt_channels.txt)
+                        Path to the channels list file to use if the
+                        environment variable `CHANNELS` is not set 
+(default:
+                        ~/.yt_channels.txt)
   -S, --show-channels   Show the list of channels in the channels file
   -C, --create-collection
-                        Creates/appends to the backend database from the 
-channels list
+                        Creates/appends to the backend database from the
+                        channels list
 ```
 
 ---
