@@ -160,6 +160,7 @@ class ArchiveYouTube:
                      f'{identifier}; YT title: {video["title"]}; YT URL: '
                      f'{video["url"]}')
 
+        r = None
         try:
             r = upload(identifier, files=[fname], metadata=md)
         except requests.exceptions.HTTPError as e:
@@ -185,8 +186,9 @@ class ArchiveYouTube:
                                      'Skipping...')
                         return
 
-        status_code = r[0].status_code  # noqa
-        return status_code
+        if r:
+            status_code = r[0].status_code
+            return status_code
 
     def run(self) -> None:
         if self.no_logs:
