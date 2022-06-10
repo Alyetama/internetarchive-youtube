@@ -1,6 +1,8 @@
 # Internetarchive-YouTube
 
-🚀 GitHub Action and CLI to archive YouTube channels by uploading their videos to [archive.org](https://archive.org).
+[![Poetry-build](https://github.com/Alyetama/internetarchive-youtube/actions/workflows/poetry-build.yml/badge.svg)](https://github.com/Alyetama/internetarchive-youtube/actions/workflows/poetry-build.yml) [![Supported Python versions](https://img.shields.io/badge/Python-%3E=3.7-blue.svg)](https://www.python.org/downloads/) [![PEP8](https://img.shields.io/badge/Code%20style-PEP%208-orange.svg)](https://www.python.org/dev/peps/pep-0008/) 
+
+🚀 GitHub Action and CLI to archive YouTube channels by uploading the channel's videos to [archive.org](https://archive.org).
 
 - 🧑‍💻 To use this tool as a command line interface (CLI), jump to [CLI: Getting Started](<#cli-getting-started> "CLI: Getting Started").
 - ⚡️ To use this tool as a GitHub Action, jump to [GitHub Action: Getting Started](<#github-action-getting-started> "GitHub Action: Getting Started").
