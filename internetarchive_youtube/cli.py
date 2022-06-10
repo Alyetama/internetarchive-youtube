@@ -58,7 +58,7 @@ def _opts() -> argparse.Namespace:
                         '--force-refresh',
                         help='Refresh the database after every video ('
                         'Can slow down the workflow significantly, but '
-                        'is useful when running multiple concurrent jobs',
+                        'is useful when running multiple concurrent jobs)',
                         action='store_true')
     parser.add_argument('-t',
                         '--timeout',
