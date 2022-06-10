@@ -8,12 +8,20 @@ class NoDataToInclude(Exception):
     pass
 
 
+class MissingMasterKey(Exception):
+    pass
+
+
 class JSONBin:
 
-    def __init__(self, jsonbin_key):
+    def __init__(self, jsonbin_key: str, no_logs: bool = False):
         self.jsonbin_key = jsonbin_key
+        self.no_logs = no_logs
 
     def handle_collection_bins(self, include_data=None):
+        if not self.jsonbin_key:
+            raise MissingMasterKey('The secret JSONBIN token can\'t be None!')
+
         url = 'https://api.jsonbin.io/v3'
 
         headers = {
@@ -48,7 +56,8 @@ class JSONBin:
             # If not (first run), create a bin with the initial data
             if not include_data:
                 raise NoDataToInclude
-            print('Creating a new bin...')
+            if not self.no_logs:
+                print('Creating a new bin...')
             headers.update({
                 'X-Bin-Name': 'DATA',
                 'Content-Type': 'application/json',

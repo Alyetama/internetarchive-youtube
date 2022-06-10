@@ -197,3 +197,4 @@ debugging.py
 *.part*
 *.webm
 *.mp4
+_channels.txt
