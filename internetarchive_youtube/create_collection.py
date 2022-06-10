@@ -3,20 +3,17 @@
 
 import json
 import os
-import random
 import shlex
 import subprocess
-import sys
 from pathlib import Path
 from typing import Optional
 
 import pymongo
-import requests
-from dotenv import load_dotenv
 from loguru import logger
 from pymongo.database import Database
 from pymongo.errors import DuplicateKeyError
-from jsonbin_manager import JSONBin, NoDataToInclude
+
+from internetarchive_youtube.jsonbin_manager import JSONBin, NoDataToInclude
 
 
 class InvalidChannelURLFormat(Exception):
@@ -25,9 +22,13 @@ class InvalidChannelURLFormat(Exception):
 
 class CreateCollection:
 
-    def __init__(self, channel_name: str, channel_url: str) -> None:
+    def __init__(self,
+                 channel_name: str,
+                 channel_url: str,
+                 no_logs: bool = False) -> None:
         self.channel_name = channel_name
         self.channel_url = channel_url
+        self.no_logs = no_logs
 
     @staticmethod
     def mongodb_client(return_names: bool = False) -> Database:
@@ -73,6 +74,9 @@ class CreateCollection:
         return data
 
     def create_collection(self):
+        if self.no_logs:
+            logger.remove()
+
         existing_data = []
         existing_ids = []
         bin_id = None
@@ -159,36 +163,3 @@ class CreateCollection:
 
         logger.debug('Finished updating the metadata database...')
         return data
-
-
-def main() -> None:
-    channels = os.getenv('CHANNELS')
-    if not channels:
-        raise TypeError('`CHANNELS` cannot be empty!')
-
-    if channels.startswith('http'):
-        channels = requests.get(channels).text
-
-    elif Path(channels).exists():
-        with open(channels) as f:
-            channels = f.read()
-
-    try:
-        channels = json.loads(channels).items()
-    except json.decoder.JSONDecodeError:
-        channels = [tuple(x.split(': ')) for x in channels.strip().split('\n')]
-
-    random.shuffle(channels)
-
-    for channel in channels:
-        logger.debug(f'Current channel: {channel}')
-        cc = CreateCollection(channel[0], channel[1])
-        _ = cc.create_collection()
-    return
-
-
-if __name__ == '__main__':
-    load_dotenv()
-    if '--no-logs' in sys.argv:
-        logger.remove()
-    main()

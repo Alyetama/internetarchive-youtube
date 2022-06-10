@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "internetarchive-youtube"
+version = "0.1.0"
+description = "Archives YouTube channels by automatically uploading their videos to archive.org"
+authors = ["Mohammad Alyetama <malyetama@pm.me>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pymongo = {version = ">=4.0.2", extras = ["srv"]}
+yt-dlp = ">=2022.5.18"
+internetarchive = ">=3.0.0"
+tqdm = ">=4.60.0"
+loguru = ">=0.6.0"
+requests = ">=2.27"
+python-dotenv = ">=0.20"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+ia-yt = 'internetarchive_youtube:cli.main'
+ia_yt = 'internetarchive_youtube:cli.main'
+internetarchive-youtube = 'internetarchive_youtub:cli.main'
+internetarchive_youtube = 'internetarchive_youtub:cli.main'

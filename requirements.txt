@@ -1,7 +1,7 @@
 pymongo[srv]>=4.0.2
 yt_dlp>=2022.5.18
 internetarchive>=3.0.0
-tqdm>=4.64.0
+tqdm>=4.60
 loguru>=0.6.0
-requests>=2.27.1
-python-dotenv>=0.20.0
+requests>=2.27
+python-dotenv>=0.20
