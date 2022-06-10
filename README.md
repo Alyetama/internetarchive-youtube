@@ -21,6 +21,16 @@ pip install internetarchive-youtube
 ### 🗃️ Backend database:
 - [Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database") to track the download/upload overall progress.
 
+- If you picked **option 1 (MongoDB)**, export MongoDB connection string as an environment variable:
+```sh
+export MONGODB_CONNECTION_STRING=mongodb://username:password@host:port
+```
+
+- If you picked **option 2 (JSON bin)**, export JSONBIN master key as an environment variable:
+```sh
+export JSONBIN_KEY=xxxxxxxxxxxxxxxxx
+```
+
 ### ⌨️ Usage:
 ```
 usage: ia-yt [-h] [-p PRIORITIZE] [-s SKIP_LIST] [-f] [-t TIMEOUT] [-n] [-a] [-c CHANNELS_FILE] [-S] [-C]
