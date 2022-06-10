@@ -198,3 +198,5 @@ debugging.py
 *.webm
 *.mp4
 _channels.txt
+.circleci/config.yml
+.travis.yml
