@@ -16,6 +16,10 @@
 ### ⬇️ Installation:
 ```sh
 pip install internetarchive-youtube
+
+# Install and login to internetarchive
+pip install internetarchive
+ia configure
 ```
 
 ### 🗃️ Backend database:
