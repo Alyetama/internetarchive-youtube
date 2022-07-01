@@ -5,20 +5,34 @@ import requests
 
 
 class NoDataToInclude(Exception):
+    """Raised when there is no data to include."""
     pass
 
 
 class MissingMasterKey(Exception):
+    """Raised when the master key is missing."""
     pass
 
 
 class JSONBin:
+    """JSONBin manager."""
 
     def __init__(self, jsonbin_key: str, no_logs: bool = False):
+        """Initialize the JSONBin manager.
+
+        Args:
+            jsonbin_key: The JSONBin master key.
+            no_logs: Whether to print logs or not.
+        """
         self.jsonbin_key = jsonbin_key
         self.no_logs = no_logs
 
     def handle_collection_bins(self, include_data=None):
+        """Handle the collection bins.
+
+        Args:
+            include_data: Whether to include data or not.
+        """
         if not self.jsonbin_key:
             raise MissingMasterKey('The secret JSONBIN token can\'t be None!')
 
@@ -71,12 +85,23 @@ class JSONBin:
         return bin_id
 
     def read_bin(self, bin_id):
+        """Reads the bin.
+
+        Args:
+            bin_id: The bin ID.
+        """
         url = 'https://api.jsonbin.io/v3'
         headers = {'X-Master-Key': self.jsonbin_key}
         read_resp = requests.get(f'{url}/b/{bin_id}', headers=headers)
         return read_resp.json()
 
     def update_bin(self, bin_id, data):
+        """Updates the bin.
+
+        Args:
+            bin_id: The bin ID.
+            data: The data to update.
+        """
         url = 'https://api.jsonbin.io/v3'
         headers = {
             'X-Master-Key': self.jsonbin_key,

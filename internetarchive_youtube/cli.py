@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+"""Command line interface for Internetarchive-YouTube Sync."""
 
 import argparse
 import io
@@ -14,10 +15,30 @@ from dotenv import load_dotenv
 
 from internetarchive_youtube.archive_youtube import ArchiveYouTube
 from internetarchive_youtube.create_collection import CreateCollection
-from internetarchive_youtube.handlers import TimeLimitReached, alarm_handler
+
+
+class TimeLimitReached(Exception):
+    """Raised when the time limit is reached."""
+    pass
+
+
+def alarm_handler(signum: int, _: object):
+    """Signal handler for SIGALRM.
+
+    Raises:
+        TimeLimitReached: When the time limit is reached.
+    """
+    print('Signal handler called with signal:', signum)
+    raise TimeLimitReached(
+        'The GitHub action is about to die. Terminating the job safely...')
 
 
 def _create_collection(no_logs: bool = False) -> None:
+    """Creates a collection from the channels list.
+
+    Args:
+        no_logs: Whether to print logs.
+    """
     channels = os.getenv('CHANNELS')
     if not channels:
         raise TypeError('`CHANNELS` cannot be empty!')
@@ -44,6 +65,7 @@ def _create_collection(no_logs: bool = False) -> None:
 
 
 def _opts() -> argparse.Namespace:
+    """Parses the command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-p',
                         '--prioritize',
@@ -93,6 +115,7 @@ def _opts() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Main function."""
     load_dotenv()
     args = _opts()
 

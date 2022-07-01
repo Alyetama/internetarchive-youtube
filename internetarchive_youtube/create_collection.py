@@ -17,6 +17,7 @@ from internetarchive_youtube.jsonbin_manager import JSONBin, NoDataToInclude
 
 
 class InvalidChannelURLFormat(Exception):
+    """Raised when the channel URL is not in the correct format."""
     pass
 
 
@@ -26,29 +27,42 @@ class CreateCollection:
                  channel_name: str,
                  channel_url: str,
                  no_logs: bool = False) -> None:
+        """Initialize the class.
+
+        Args:
+            channel_name (str): The name of the channel.
+            channel_url (str): The URL of the channel.
+            no_logs (bool, optional): Whether to disable logging. Defaults to
+                False.
+        """
         self.channel_name = channel_name
         self.channel_url = channel_url
         self.no_logs = no_logs
 
     @staticmethod
-    def mongodb_client(return_names: bool = False) -> Database:
+    def mongodb_client() -> Database:
+        """Return a MongoDB client."""
         client = pymongo.MongoClient(os.getenv('MONGODB_CONNECTION_STRING'))
         db = client['yt']
-        if return_names:
-            return db.list_collection_names()
         return db
 
     def info_cmd(self, playlist_end: str = '') -> Optional[str]:
-        base_url = None
-        if 'youtube' in self.channel_url.lower():
-            base_url = 'https://www.youtube.com/watch?v='
-        if 'twitch' in self.channel_url.lower():
-            if '/videos' not in self.channel_url:
-                raise InvalidChannelURLFormat(
-                    'The format of the channel URL is invalid! Example of a '
-                    'valid URL: https://www.twitch.tv/foobar0228/videos')
-            base_url = 'https://www.twitch.tv/videos/'
+        """Return the command to get the metadata.
 
+        Args:
+            playlist_end (str, optional): The playlist end parameter. Defaults
+                to ''.
+        """
+        # base_url = None
+        # if 'youtube' in self.channel_url.lower():
+        #     base_url = 'https://www.youtube.com/watch?v='
+        # if 'twitch' in self.channel_url.lower():
+        #     if '/videos' not in self.channel_url:
+        #         raise InvalidChannelURLFormat(
+        #             'The format of the channel URL is invalid! Example of a '
+        #             'valid URL: https://www.twitch.tv/foobar0228/videos')
+        #     base_url = 'https://www.twitch.tv/videos/'
+        base_url = 'https://www.youtube.com/watch?v='
         cmd = f'yt-dlp {playlist_end} --get-filename -o ' \
               '\'{"upload_date": "%(upload_date)s", ' \
               '"title": "%(title)s", "url": ' \
@@ -57,7 +71,12 @@ class CreateCollection:
               f'"{self.channel_url}"'
         return cmd
 
-    def append_data(self, data: list):
+    def append_data(self, data: list) -> list:
+        """Append the data to the collection.
+
+        Args:
+            data (list): The data to append.
+        """
         for video in data:
             if 'youtube' in video['url']:
                 _id = video['url'].split('watch?v=')[1]
@@ -74,6 +93,7 @@ class CreateCollection:
         return data
 
     def create_collection(self):
+        """Creates the collection."""
         if self.no_logs:
             logger.remove()
 
