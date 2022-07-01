@@ -85,11 +85,19 @@ ia configure
 - If you choose **MongoDB**, export the connection string as an environment variable:
 ```sh
 export MONGODB_CONNECTION_STRING=mongodb://username:password@host:port
+
+# or add it to your shell configuration file:
+echo "MONGODB_CONNECTION_STRING=$MONGODB_CONNECTION_STRING" >> "$HOME/.$(basename $SHELL)rc"
+source "$HOME/.$(basename $SHELL)rc"
 ```
 
 - If you choose **JSONBin**, export the master key as an environment variable:
 ```sh
 export JSONBIN_KEY=xxxxxxxxxxxxxxxxx
+
+# or add it to your shell configuration file:
+echo "JSONBIN_KEY=$JSONBIN_KEY" >> "$HOME/.$(basename $SHELL)rc"
+source "$HOME/.$(basename $SHELL)rc"
 ```
 
 #### ⌨️ Usage:

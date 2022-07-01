@@ -3,6 +3,8 @@
 
 import os
 import random
+import re
+import string
 import time
 import uuid
 from pathlib import Path
@@ -16,12 +18,11 @@ from loguru import logger
 from pymongo.collection import Collection
 from tqdm import tqdm
 
-from internetarchive_youtube.clean_name import clean_fname
 from internetarchive_youtube.jsonbin_manager import JSONBin
 
 
 class NoStorageSecretFound(Exception):
-    pass
+    """Raised when no storage secret is found in the database"""
 
 
 class ArchiveYouTube:
@@ -31,15 +32,46 @@ class ArchiveYouTube:
                  skip_list: Optional[list] = None,
                  force_refresh: bool = True,
                  no_logs: bool = False):
+        """Initialize the class.
+
+        Args:
+            prioritize: List of channels to prioritize.
+            skip_list: List of channels to skip.
+            force_refresh: Force refresh of the database.
+            no_logs: Disable logging.
+        """
         self.prioritize = prioritize
         self.skip_list = skip_list
         self.force_refresh = force_refresh
         self.no_logs = no_logs
 
+    @staticmethod
+    def clean_fname(file_name: str) -> str:
+        """Clean file name.
+
+        Args:
+            file_name (str): File name.
+
+        Returns:
+            str: Cleaned file name.
+        """
+
+        file_name = Path(file_name)
+        illegal = re.sub('[-_]', '', string.punctuation + string.whitespace)
+        fname = re.sub(r'\s\[\w+]', '', file_name.stem)
+        fname = re.sub(rf'[{illegal}]', '-', fname)
+        clean_name = re.sub(r'-+', '_', fname).strip('-') + file_name.suffix
+        return clean_name
+
     def load_data(
         self
     ) -> tuple[bool, bool, Optional[Collection], Optional[JSONBin],
                Optional[str], list]:
+        """Load data from the database.
+
+        Returns:
+            tuple: (mongodb, jsonbin, col, jb, bin_id, data)
+        """
 
         jsonbin = False
         mongodb = False
@@ -66,9 +98,7 @@ class ArchiveYouTube:
                                        '`MONGODB_CONNECTION_STRING` or '
                                        '`JSONBIN_KEY`!')
 
-        data = [
-            x for x in data if not x['downloaded'] or not x['uploaded']
-        ]
+        data = [x for x in data if not x['downloaded'] or not x['uploaded']]
 
         random.shuffle(data)
 
@@ -84,12 +114,19 @@ class ArchiveYouTube:
             data = first + second
         return mongodb, jsonbin, col, jb, bin_id, data
 
-    @staticmethod
-    def create_metadata(video: dict) -> tuple[str, str, dict, str]:
+    def create_metadata(self, video: dict) -> tuple[str, str, dict, str]:
+        """Create metadata for the video.
+
+        Args:
+            video: Video to create metadata for.
+
+        Returns:
+            tuple: (id, fname, md, identifier)
+        """
         _id = video['_id']
         ts = video['upload_date']
         y, m, d = ts[:4], ts[4:6], ts[6:]
-        clean_name = clean_fname(video["title"])
+        clean_name = self.clean_fname(video["title"])
         title = f'{y}-{m}-{d}__{clean_name}'
         fname = f'{title}.mp4'
 
@@ -122,6 +159,16 @@ class ArchiveYouTube:
 
     @staticmethod
     def download(video: dict, ydl_opts: dict, fname: str) -> Optional[bool]:
+        """Download the video.
+
+        Args:
+            video: Video to download.
+            ydl_opts: Options for youtube-dl.
+            fname: Filename to save the video to.
+
+        Returns:
+            bool: True if the video was downloaded, False otherwise.
+        """
         logger.debug(f'🚀 (CURRENT DOWNLOAD) -> File: {fname}; YT title: '
                      f'{video["title"]}; YT URL: {video["url"]}')
 
@@ -145,6 +192,17 @@ class ArchiveYouTube:
     @staticmethod
     def upload(video: dict, md: dict, identifier: str,
                fname: str) -> Optional[int]:
+        """Upload the video.
+
+        Args:
+            video: Video to upload.
+            md: Metadata for the video.
+            identifier: Identifier for the video.
+            fname: Filename of the video.
+
+        Returns:
+            int: ID of the uploaded video.
+        """
         logger.debug(f'Upload metadata: {md}')
         identifier = identifier.replace(' ', '').strip()
         cur_metadata = get_item(identifier).item_metadata
@@ -191,6 +249,7 @@ class ArchiveYouTube:
             return status_code
 
     def run(self) -> None:
+        """Run the pipeline."""
         if self.no_logs:
             logger.remove()
 
