@@ -176,17 +176,9 @@ class ArchiveYouTube:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download(video['url'])
         except yt_dlp.utils.DownloadError as e:
-            logger.error(f'❌ Error with video: {video}')
-            logger.error(f'❌ ERROR message: {e}')
-            logger.debug('Trying again with no format specification...')
-
-            try:
-                with yt_dlp.YoutubeDL({'outtmpl': fname}) as ydl:
-                    ydl.download(video['url'])
-            except yt_dlp.utils.DownloadError as e:
-                logger.error(f'❌ Failed again! ERROR message: {e}')
-                logger.error(f'❌ Skipping ({video["url"]})...')
-                return
+            logger.error(f'❌ Failed again! ERROR message: {e}')
+            logger.error(f'❌ Skipping ({video["url"]})...')
+            return
         return True
 
     @staticmethod
@@ -305,7 +297,8 @@ class ArchiveYouTube:
                     logger.debug('✅ Uploaded!')
                 else:
                     logger.error(f'❌ Could not upload {video}!')
-                    logger.error(f'❌ Status code error with video: {video}')
+                    logger.error(
+                        f'❌ Status code {status_code} for video: {video}')
 
             if self.force_refresh:
                 # Update database in current loop for running concurrent jobs
