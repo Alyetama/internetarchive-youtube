@@ -265,7 +265,6 @@ class ArchiveYouTube:
                     continue
 
             ydl_opts = {
-                'format': 'mp4/bestaudio+bestvideo',
                 'outtmpl': fname,
                 'quiet': True,
                 'no-warnings': True,
