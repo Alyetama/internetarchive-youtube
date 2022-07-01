@@ -2,18 +2,75 @@
 
 [![Poetry-build](https://github.com/Alyetama/internetarchive-youtube/actions/workflows/poetry-build.yml/badge.svg)](https://github.com/Alyetama/internetarchive-youtube/actions/workflows/poetry-build.yml) [![Supported Python versions](https://img.shields.io/badge/Python-%3E=3.7-blue.svg)](https://www.python.org/downloads/) [![PEP8](https://img.shields.io/badge/Code%20style-PEP%208-orange.svg)](https://www.python.org/dev/peps/pep-0008/) 
 
-🚀 GitHub Action and CLI to archive YouTube channels by uploading the channel's videos to [archive.org](https://archive.org).
+🚀 GitHub Action and CLI tool to archive YouTube channels by automatically uploading an entire YouTube channel to [archive.org](https://archive.org) in few clicks.
 
-- 🧑‍💻 To use this tool as a command line interface (CLI), jump to [CLI: Getting Started](<#cli-getting-started-> "CLI: Getting Started").
-- ⚡️ To use this tool as a GitHub Action, jump to [GitHub Action: Getting Started](<#github-action-getting-started-%EF%B8%8F> "GitHub Action: Getting Started").
+## 📌 Global Requirements
+- All you need is an [Internet Archive account](https://archive.org/account/signup).
+
+## 🔧 Usage
+
+- ⚡️ To use this tool as a GitHub Action, jump to [GitHub Action: Getting Started](<#%EF%B8%8F-github-action-getting-started> "GitHub Action: Getting Started").
+- 🧑‍💻 To use this tool as a command line interface (CLI), jump to [CLI: Getting Started](<#-cli-getting-started> "CLI: Getting Started").
+
+---
+
+### ⚡️ GitHub Action: Getting Started
+
+<details>
+  <summary>Using internetarchive-youtube as a GitHub Action instructions</summary>
+
+1. **[Fork this repository](https://github.com/Alyetama/yt-archive-sync/fork).**
+
+2. **Enable the workflows in your fork.**
+
+<img src="https://i.imgur.com/J1udGei.jpeg"  width="720"> 
+<img src="https://i.imgur.com/WhyFjWy.jpeg"  width="720"> 
+
+2. **[Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database").**
+3. **Add your *Archive.org* credentials to the repository's *Actions* secrets:**
+  - `ARCHIVE_USER_EMAIL`
+  - `ARCHIVE_PASSWORD`
+
+4. **Add a list of the channels you want to archive as a `CHANNELS` secret to the repository's Actions secrets:**
+
+The `CHANNELS` secret should be formatted like this example:
+
+```
+CHANNEL_NAME: CHANNEL_URL
+FOO: FOO_CHANNEL_URL
+FOOBAR: FOOBAR_CHANNEL_URL
+SOME_CHANNEL: SOME_CHANNEL_URL
+```
+
+Don't add any quotes around the name or the URL, and make sure to keep one space between the colon and the URL.
+
+5. **Add the database secret(s) to the repository's *Actions* secrets:**
+
+If you picked **option 1 (MongoDB)**, add this secret:
+  - `MONGODB_CONNECTION_STRING`
+The value of the secret is the database conneciton string.
+
+If you picked **option 2 (JSON bin)**, add this additional secret:
+  - `JSONBIN_KEY`  
+The value of this secret is the *MASTER KEY* token you copied from JSONbin.
+
+6. **Run the workflow under `Actions` manually, or wait for it to run automatically every 6 hours.**
+
+That's it!
+
+</details>
 
 
-## CLI: Getting Started 🧑‍💻
 
-### Requirements:
+### 🧑‍💻 CLI: Getting Started
+
+<details>
+  <summary>Using internetarchive-youtube as a CLI tool instructions</summary>
+
+#### Requirements:
 - 🐍 [Python>=3.7](https://www.python.org/downloads/)
 
-### ⬇️ Installation:
+#### ⬇️ Installation:
 ```sh
 pip install internetarchive-youtube
 
@@ -22,7 +79,7 @@ pip install internetarchive
 ia configure
 ```
 
-### 🗃️ Backend database:
+#### 🗃️ Backend database:
 - [Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database") to track the download/upload overall progress.
 
 - If you choose **MongoDB**, export the connection string as an environment variable:
@@ -35,7 +92,7 @@ export MONGODB_CONNECTION_STRING=mongodb://username:password@host:port
 export JSONBIN_KEY=xxxxxxxxxxxxxxxxx
 ```
 
-### ⌨️ Usage:
+#### ⌨️ Usage:
 ```
 usage: ia-yt [-h] [-p PRIORITIZE] [-s SKIP_LIST] [-f] [-t TIMEOUT] [-n] [-a] [-c CHANNELS_FILE] [-S] [-C]
 
@@ -64,54 +121,24 @@ optional arguments:
                         channels list
 ```
 
+</details>
+
 ---
-
-## GitHub Action: Getting Started ⚡️
-
-1. **[Fork this repository](https://github.com/Alyetama/yt-archive-sync/fork).**
-2. **[Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database").**
-3. **Add your *Archive.org* credentials to the repository's *Actions* secrets:**
-  - `ARCHIVE_USER_EMAIL`
-  - `ARCHIVE_PASSWORD`
-
-4. **Add a list of the channels you want to archive to the repository's Actions secrets:**
-
-The `CHANNELS` secret should be formatted like this example:
-
-```
-CHANNEL_NAME: CHANNEL_URL
-FOO: CHANNEL_URL
-FOOBAR: CHANNEL_URL
-SOME_CHANNEL: CHANNEL_URL
-```
-
-Don't add any quotes around the name or the URL, and make sure to keep one space between the colon and the URL.
-
-
-5. **Add the database secret(s) to the repository's *Actions* secrets:**
-
-If you picked **option 1 (MongoDB)**, add this additional secret:
-  - `MONGODB_CONNECTION_STRING`
-
-If you picked **option 2 (JSON bin)**, add this additional secret:
-  - `JSONBIN_KEY`  
-
-
-6. **Run the workflow under `Actions` manually with a `workflow_dispatch`, or wait for it to run automatically.**
-
-That's it!
-
 
 ## 🏗️ Creating A Backend Database
 
+<details>
+  <summary>Creating A Backend Database instructions</summary>
+
 - **Option 1:**  MongoDB (recommended).
   - Self-hosted (see: [Alyetama/quick-MongoDB](https://github.com/Alyetama/quick-MongoDB) or [dockerhub image](https://hub.docker.com/_/mongo)).
-  - Free database on [Atlas](https://www.mongodb.com/database/free).
+  - Free cloud database on [Atlas](https://www.mongodb.com/database/free).
 - **Option 2:** JSON bin (if you want a quick start).
   - Sign up to JSONBin [here](https://jsonbin.io/login).
   - Click on `VIEW MASTER KEY`, then copy the key.
+  
+</details>
 
----
 
 ## 📝 Notes
 
