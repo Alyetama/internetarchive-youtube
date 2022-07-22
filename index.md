@@ -16,9 +16,6 @@
 
 ### ⚡️ GitHub Action: Getting Started
 
-<details>
-  <summary>Using internetarchive-youtube as a GitHub Action instructions</summary>
-
 1. **[Fork this repository](https://github.com/Alyetama/yt-archive-sync/fork).**
 
 2. **Enable the workflows in your fork.**
@@ -35,7 +32,7 @@
 
 The `CHANNELS` secret should be formatted like this example:
 
-```
+```yaml
 CHANNEL_NAME: CHANNEL_URL
 FOO: FOO_CHANNEL_URL
 FOOBAR: FOOBAR_CHANNEL_URL
@@ -58,14 +55,8 @@ The value of this secret is the *MASTER KEY* token you copied from JSONbin.
 
 That's it!
 
-</details>
-
-
 
 ### 🧑‍💻 CLI: Getting Started
-
-<details>
-  <summary>Using internetarchive-youtube as a CLI tool instructions</summary>
 
 #### Requirements:
 - 🐍 [Python>=3.7](https://www.python.org/downloads/)
@@ -129,14 +120,9 @@ optional arguments:
                         channels list
 ```
 
-</details>
-
 ---
 
 ## 🏗️ Creating A Backend Database
-
-<details>
-  <summary>Creating A Backend Database instructions</summary>
 
 - **Option 1:**  MongoDB (recommended).
   - Self-hosted (see: [Alyetama/quick-MongoDB](https://github.com/Alyetama/quick-MongoDB) or [dockerhub image](https://hub.docker.com/_/mongo)).
@@ -144,8 +130,6 @@ optional arguments:
 - **Option 2:** JSON bin (if you want a quick start).
   - Sign up to JSONBin [here](https://jsonbin.io/login).
   - Click on `VIEW MASTER KEY`, then copy the key.
-  
-</details>
 
 
 ## 📝 Notes

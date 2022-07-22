@@ -215,3 +215,7 @@ debugging.py
 _channels.txt
 .circleci/config.yml
 .travis.yml
+docs/
+conf.example.py
+conf.py
+build_docs.sh
