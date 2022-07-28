@@ -201,5 +201,4 @@ _channels.txt
 .circleci/config.yml
 .travis.yml
 conf.example.py
-docs/
 build_docs.sh
