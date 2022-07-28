@@ -5,6 +5,7 @@
 🚀 GitHub Action and CLI tool to archive YouTube channels by automatically uploading an entire YouTube channel to [archive.org](https://archive.org) in few clicks.
 
 ## 📌 Global Requirements
+
 - All you need is an [Internet Archive account](https://archive.org/account/signup).
 
 ## 🔧 Usage
@@ -26,16 +27,17 @@
 <img src="https://i.imgur.com/J1udGei.jpeg"  width="720"> 
 <img src="https://i.imgur.com/WhyFjWy.jpeg"  width="720"> 
 
-2. **[Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database").**
-3. **Add your *Archive.org* credentials to the repository's *Actions* secrets:**
+3. **[Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database").**
+
+4. **Add your *Archive.org* credentials to the repository's actions secrets:**
   - `ARCHIVE_USER_EMAIL`
   - `ARCHIVE_PASSWORD`
 
-4. **Add a list of the channels you want to archive as a `CHANNELS` secret to the repository's Actions secrets:**
+5. **Add a list of the channels you want to archive as a `CHANNELS` secret to the repository's actions secrets:**
 
 The `CHANNELS` secret should be formatted like this example:
 
-```
+```YAML
 CHANNEL_NAME: CHANNEL_URL
 FOO: FOO_CHANNEL_URL
 FOOBAR: FOOBAR_CHANNEL_URL
@@ -44,7 +46,7 @@ SOME_CHANNEL: SOME_CHANNEL_URL
 
 Don't add any quotes around the name or the URL, and make sure to keep one space between the colon and the URL.
 
-5. **Add the database secret(s) to the repository's *Actions* secrets:**
+6. **Add the database secret(s) to the repository's *Actions* secrets:**
 
 If you picked **option 1 (MongoDB)**, add this secret:
   - `MONGODB_CONNECTION_STRING`
@@ -54,12 +56,11 @@ If you picked **option 2 (JSON bin)**, add this additional secret:
   - `JSONBIN_KEY`  
 The value of this secret is the *MASTER KEY* token you copied from JSONbin.
 
-6. **Run the workflow under `Actions` manually, or wait for it to run automatically every 6 hours.**
+7. **Run the workflow under `Actions` manually, or wait for it to run automatically every 6 hours.**
 
-That's it!
+That's it! 🎉
 
 </details>
-
 
 
 ### 🧑‍💻 CLI: Getting Started
@@ -68,21 +69,27 @@ That's it!
   <summary>Using internetarchive-youtube as a CLI tool instructions</summary>
 
 #### Requirements:
+
 - 🐍 [Python>=3.7](https://www.python.org/downloads/)
 
 #### ⬇️ Installation:
+
 ```sh
 pip install internetarchive-youtube
+```
 
-# Install and login to internetarchive
-pip install internetarchive
+Then login to internetarchive:
+
+```sh
 ia configure
 ```
 
 #### 🗃️ Backend database:
+
 - [Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database") to track the download/upload overall progress.
 
 - If you choose **MongoDB**, export the connection string as an environment variable:
+
 ```sh
 export MONGODB_CONNECTION_STRING=mongodb://username:password@host:port
 
@@ -92,6 +99,7 @@ source "$HOME/.$(basename $SHELL)rc"
 ```
 
 - If you choose **JSONBin**, export the master key as an environment variable:
+
 ```sh
 export JSONBIN_KEY=xxxxxxxxxxxxxxxxx
 
@@ -101,6 +109,7 @@ source "$HOME/.$(basename $SHELL)rc"
 ```
 
 #### ⌨️ Usage:
+
 ```
 usage: ia-yt [-h] [-p PRIORITIZE] [-s SKIP_LIST] [-f] [-t TIMEOUT] [-n] [-a] [-c CHANNELS_FILE] [-S] [-C]
 
@@ -152,4 +161,4 @@ optional arguments:
 
 - Information about the `MONGODB_CONNECTION_STRING` can be found [here](https://www.mongodb.com/docs/manual/reference/connection-string/).
 - Jobs can run for a maximum of 6 hours, so if you're archiving a large channel, the job might die, but it will resume in a new job when it's scheduled to run.
-- Instead of raw text, you can pass a file path or a file URL with a list of channels formatted as `CHANNEL_NAME: CHANNEL_URL` or in JSON format `{"CHANNEL_NAME": "CHANNEL_URL"}`.
+- Instead of raw text, you can pass a file path or a file URL with a list of channels formatted as `CHANNEL_NAME: CHANNEL_URL`. You can also pass raw text or a file of the channels in JSON format `{"CHANNEL_NAME": "CHANNEL_URL"}`.
