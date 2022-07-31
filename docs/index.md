@@ -21,8 +21,8 @@
 
 2. **Enable the workflows in your fork.**
 
-<img src="https://i.imgur.com/J1udGei.jpeg"  width="720"> 
-<img src="https://i.imgur.com/WhyFjWy.jpeg"  width="720"> 
+<img src="https://i.imgur.com/J1udGei.jpeg"  width="720" alt=""> 
+<img src="https://i.imgur.com/WhyFjWy.jpeg"  width="720" alt=""> 
 
 3. **[Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database").**
 
@@ -53,7 +53,9 @@ If you picked **option 2 (JSON bin)**, add this additional secret:
   - `JSONBIN_KEY`  
 The value of this secret is the *MASTER KEY* token you copied from JSONbin.
 
-7. **Run the workflow under `Actions` manually, or wait for it to run automatically every 6 hours.**
+7. (optional) You can add command line options other than the defaults by creating a secret called `CLI_OPTIONS` and adding the options to the secret. See the [CLI: Getting Started](<#-cli-getting-started> "CLI: Getting Started") for a list of all the available options.
+
+8. **Run the workflow under `Actions` manually, or wait for it to run automatically every 6 hours.**
 
 That's it! 🎉
 
@@ -103,31 +105,32 @@ source "$HOME/.$(basename $SHELL)rc"
 #### ⌨️ Usage:
 
 ```
-usage: ia-yt [-h] [-p PRIORITIZE] [-s SKIP_LIST] [-f] [-t TIMEOUT] [-n] [-a] [-c CHANNELS_FILE] [-S] [-C]
+usage: ia-yt [-h] [-p PRIORITIZE] [-s SKIP_LIST] [-f] [-t TIMEOUT] [-n] [-a] [-c CHANNELS_FILE] [-S] [-C] [-m] [-T THREADS] [-k] [-i IGNORE_VIDEO_IDS]
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -p PRIORITIZE, --prioritize PRIORITIZE
-                        Comma-separated list of channel names to prioritize
-                        when processing videos
+                        Comma-separated list of channel names to prioritize when processing videos.
   -s SKIP_LIST, --skip-list SKIP_LIST
-                        Comma-separated list of channel names to skip
-  -f, --force-refresh   Refresh the database after every video (Can slow down
-                        the workflow significantly, but is useful when running
-                        multiple concurrent jobs)
+                        Comma-separated list of channel names to skip.
+  -f, --force-refresh   Refresh the database after every video (Can slow down the workflow significantly, but is useful when running multiple concurrent
+                        jobs).
   -t TIMEOUT, --timeout TIMEOUT
-                        Kill the job after n hours (default: 5.5)
-  -n, --no-logs         Don't print any log messages
-  -a, --add-channel     Add a channel interactively to the list of channels to
-                        archive
+                        Kill the job after n hours (default: 5.5).
+  -n, --no-logs         Don't print any log messages.
+  -a, --add-channel     Add a channel interactively to the list of channels to archive.
   -c CHANNELS_FILE, --channels-file CHANNELS_FILE
-                        Path to the channels list file to use if the
-                        environment variable `CHANNELS` is not set (default:
-                        ~/.yt_channels.txt)
-  -S, --show-channels   Show the list of channels in the channels file
+                        Path to the channels list file to use if the environment variable `CHANNELS` is not set (default: ~/.yt_channels.txt).
+  -S, --show-channels   Show the list of channels in the channels file.
   -C, --create-collection
-                        Creates/appends to the backend database from the
-                        channels list
+                        Creates/appends to the backend database from the channels list.
+  -m, --multithreading  Enables processing multiple videos concurrently.
+  -T THREADS, --threads THREADS
+                        Number of threads to use when multithreading is enabled. Defaults to the optimal maximum number of workers.
+  -k, --keep-failed-uploads
+                        Keep the files of failed uploads on the local disk.
+  -i IGNORE_VIDEO_IDS, --ignore-video-ids IGNORE_VIDEO_IDS
+                        Comma-separated list or a path to a file containing a list of video ids to ignore.
 ```
 
 ---
@@ -140,7 +143,6 @@ optional arguments:
 - **Option 2:** JSON bin (if you want a quick start).
   - Sign up to JSONBin [here](https://jsonbin.io/login).
   - Click on `VIEW MASTER KEY`, then copy the key.
-
 
 
 ## 📝 Notes
