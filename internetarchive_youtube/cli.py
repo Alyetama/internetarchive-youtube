@@ -19,10 +19,9 @@ from internetarchive_youtube.create_collection import CreateCollection
 
 class TimeLimitReached(Exception):
     """Raised when the time limit is reached."""
-    pass
 
 
-def alarm_handler(signum: int, _: object):
+def _alarm_handler(signum: int, _: object):
     """Signal handler for SIGALRM.
 
     Raises:
@@ -70,47 +69,68 @@ def _opts() -> argparse.Namespace:
     parser.add_argument('-p',
                         '--prioritize',
                         help='Comma-separated list of channel names to '
-                        'prioritize when processing videos',
+                        'prioritize when processing videos.',
                         type=str)
     parser.add_argument('-s',
                         '--skip-list',
-                        help='Comma-separated list of channel names to skip',
+                        help='Comma-separated list of channel names to skip.',
                         type=str)
     parser.add_argument('-f',
                         '--force-refresh',
                         help='Refresh the database after every video ('
                         'Can slow down the workflow significantly, but '
-                        'is useful when running multiple concurrent jobs)',
+                        'is useful when running multiple concurrent jobs).',
                         action='store_true')
     parser.add_argument('-t',
                         '--timeout',
-                        help='Kill the job after n hours (default: 5.5)',
+                        help='Kill the job after n hours (default: 5.5).',
                         type=float,
                         default=5.5)
     parser.add_argument('-n',
                         '--no-logs',
-                        help='Don\'t print any log messages',
+                        help='Don\'t print any log messages.',
                         action='store_true')
     parser.add_argument('-a',
                         '--add-channel',
                         help='Add a channel interactively to the list of '
-                        'channels to archive',
+                        'channels to archive.',
                         action='store_true')
     parser.add_argument('-c',
                         '--channels-file',
                         help='Path to the channels list file to use if the '
                         'environment variable `CHANNELS` is not set ('
-                        'default: ~/.yt_channels.txt)',
+                        'default: ~/.yt_channels.txt).',
                         type=str)
     parser.add_argument('-S',
                         '--show-channels',
-                        help='Show the list of channels in the channels file',
+                        help='Show the list of channels in the channels file.',
                         action='store_true')
     parser.add_argument('-C',
                         '--create-collection',
                         help='Creates/appends to the backend database from '
-                        'the channels list',
+                        'the channels list.',
                         action='store_true')
+    parser.add_argument(
+        '-m',
+        '--multithreading',
+        help='Enables processing multiple videos concurrently.',
+        action='store_true')
+    parser.add_argument('-T',
+                        '--threads',
+                        help='Number of threads to use when multithreading is '
+                        'enabled. Defaults to the optimal maximum number of '
+                        'workers.',
+                        type=int)
+    parser.add_argument(
+        '-k',
+        '--keep-failed-uploads',
+        help='Keep the files of failed uploads on the local disk.',
+        action='store_true')
+    parser.add_argument('-i',
+                        '--ignore-video-ids',
+                        help='Comma-separated list or a path to a file '
+                        'containing a list of video ids to ignore.',
+                        type=str)
     return parser.parse_args()
 
 
@@ -119,7 +139,7 @@ def main() -> None:
     load_dotenv()
     args = _opts()
 
-    signal.signal(signal.SIGALRM, alarm_handler)
+    signal.signal(signal.SIGALRM, _alarm_handler)
     timeout = int(args.timeout * 3600)
 
     if args.create_collection:
@@ -164,7 +184,7 @@ def main() -> None:
             if f.read():
                 f.seek(0, io.SEEK_END)
                 f.write('\n')
-            channel_name = input('Channel name: ').replace(' ', '_')
+            channel_name = input('Channel name: ').replace(' ', '_').strip('_')
             channel_url = input('Channel URL: ')
             f.write(f'{channel_name}: {channel_url}')
         return
@@ -176,13 +196,22 @@ def main() -> None:
         args.prioritize = args.prioritize.split(',')
     if args.skip_list:
         args.skip_list = args.skip_list.split(',')
+    if args.ignore_video_ids:
+        if Path(args.ignore_video_ids).exists():
+            with open(args.ignore_video_ids) as f:
+                args.ignore_video_ids = f.read().strip()
+        args.ignore_video_ids = args.ignore_video_ids.split(',')
 
     try:
         signal.alarm(timeout)
         ayt = ArchiveYouTube(prioritize=args.prioritize,
                              skip_list=args.skip_list,
                              force_refresh=args.force_refresh,
-                             no_logs=args.no_logs)
+                             no_logs=args.no_logs,
+                             multithreading=args.multithreading,
+                             threads=args.threads,
+                             keep_failed_uploads=args.keep_failed_uploads,
+                             ignore_video_ids=args.ignore_video_ids)
         ayt.run()
     except TimeLimitReached:
         return

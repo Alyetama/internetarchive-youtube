@@ -62,6 +62,7 @@ class CreateCollection:
         #             'The format of the channel URL is invalid! Example of a '
         #             'valid URL: https://www.twitch.tv/foobar0228/videos')
         #     base_url = 'https://www.twitch.tv/videos/'
+
         base_url = 'https://www.youtube.com/watch?v='
         cmd = f'yt-dlp {playlist_end} --get-filename -o ' \
               '\'{"upload_date": "%(upload_date)s", ' \
@@ -162,9 +163,9 @@ class CreateCollection:
 
         if os.getenv('MONGODB_CONNECTION_STRING'):
             data = [x for x in data if x['_id'] not in existing_ids]
-            for x in data:
+            for video in data:
                 try:
-                    db['DATA'].insert_one(x)  # noqa
+                    db['DATA'].insert_one(video)  # noqa
                 except DuplicateKeyError:
                     continue
 

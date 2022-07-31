@@ -36,6 +36,8 @@ jobs:
         CHANNELS: ${{ secrets.CHANNELS }}
         MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
+        CLI_OPTIONS: ${{ secrets.CLI_OPTIONS }}
       run: |
         ia configure --username="$ARCHIVE_USER_EMAIL" --password="$ARCHIVE_PASSWORD"
-        ia-yt --create-collection && ia-yt
+        ia-yt --create-collection
+        ia-yt $CLI_OPTIONS
