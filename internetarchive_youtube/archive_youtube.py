@@ -363,7 +363,7 @@ class ArchiveYouTube:
 
     def run(self) -> None:
         """Run the job."""
-        signal.signal(signal.SIGINT, keyboard_interrupt_handler)
+        signal.signal(signal.SIGINT, self.keyboard_interrupt_handler)
 
         if self.no_logs:
             logger.remove()
