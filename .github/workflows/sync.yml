@@ -22,8 +22,7 @@ jobs:
         python-version: "3.9"
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install aria2 -y
+        sudo apt-get update && sudo apt-get install aria2 -y
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install 'poetry>=1.1.13'
@@ -41,5 +40,5 @@ jobs:
         CLI_OPTIONS: ${{ secrets.CLI_OPTIONS }}
       run: |
         ia configure --username="$ARCHIVE_USER_EMAIL" --password="$ARCHIVE_PASSWORD"
-        ia-yt --create-collection
+        ia-yt --create-collection --no-logs
         ia-yt --use-aria2c --no-logs $(echo $CLI_OPTIONS)

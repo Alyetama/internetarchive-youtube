@@ -8,6 +8,7 @@ import json
 import os
 import random
 import signal
+import sys
 from pathlib import Path
 
 import requests
@@ -148,6 +149,7 @@ def main() -> None:
 
     if args.create_collection:
         _create_collection(no_logs=args.no_logs)
+        sys.exit(0)
 
     if not args.channels_file:
         args.channels_file = f'{Path.home()}/.yt_channels.txt'
