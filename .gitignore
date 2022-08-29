@@ -202,3 +202,5 @@ _channels.txt
 .travis.yml
 conf.example.py
 build_docs.sh
+*ytdl
+build.sh

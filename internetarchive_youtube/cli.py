@@ -12,7 +12,6 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
-
 from internetarchive_youtube.archive_youtube import ArchiveYouTube
 from internetarchive_youtube.create_collection import CreateCollection
 
@@ -131,12 +130,11 @@ def _opts() -> argparse.Namespace:
                         help='Comma-separated list or a path to a file '
                         'containing a list of video ids to ignore.',
                         type=str)
-    parser.add_argument(
-        '-A',
-        '--use-aria2c',
-        help='Use external downloader, aria2c '
-        '(can significantly speed up download).',
-        action='store_true')
+    parser.add_argument('-A',
+                        '--use-aria2c',
+                        help='Use external downloader, aria2c '
+                        '(can significantly speed up download).',
+                        action='store_true')
     return parser.parse_args()
 
 

@@ -6,7 +6,9 @@ import itertools
 import os
 import random
 import re
+import signal
 import string
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -16,11 +18,10 @@ import pymongo
 import requests
 import yt_dlp
 from internetarchive import get_item, upload
+from internetarchive_youtube.jsonbin_manager import JSONBin
 from loguru import logger
 from pymongo.collection import Collection
 from tqdm import tqdm
-
-from internetarchive_youtube.jsonbin_manager import JSONBin
 
 
 class NoStorageSecretFound(Exception):
@@ -60,6 +61,12 @@ class ArchiveYouTube:
         self.ignore_video_ids = ignore_video_ids
         self.use_aria2c = use_aria2c
         self._data = None
+
+    @staticmethod
+    def keyboard_interrupt_handler(sig: int, _) -> None:
+        logger.warning(f'\nKeyboardInterrupt (id: {sig}) has been caught...')
+        logger.warning('Terminating the session gracefully...')
+        sys.exit(1)
 
     @staticmethod
     def clean_fname(file_name: str) -> str:
@@ -177,8 +184,7 @@ class ArchiveYouTube:
         return _id, title, md, identifier
 
     @staticmethod
-    def download(video: dict, ydl_opts: dict,
-                 fname: str) -> Optional[bool]:
+    def download(video: dict, ydl_opts: dict, fname: str) -> Optional[bool]:
         """Download the video.
 
         Args:
@@ -270,6 +276,8 @@ class ArchiveYouTube:
                         logger.error('❌ Failed all attempts to upload! '
                                      'Skipping...')
                         return str(e)
+            else:
+                return str(e)
 
         if r:
             status_code = r[0].status_code
@@ -314,9 +322,7 @@ class ArchiveYouTube:
             })
 
         if self.use_aria2c:
-            ydl_opts.update({
-                'external_downloader': 'aria2c'
-                })
+            ydl_opts.update({'external_downloader': 'aria2c'})
 
         if video['downloaded'] and not video['uploaded']:
             if not Path(base_fname).exists():
@@ -338,9 +344,9 @@ class ArchiveYouTube:
         if not video['uploaded']:
             suffix = list(Path('.').glob(f'*{base_fname}*'))[0].suffix
             fname = f'{base_fname}{suffix}'
-            status_code = self.upload(video, md, identifier, fname)
+            resp = self.upload(video, md, identifier, fname)
 
-            if status_code == 200:
+            if resp == 200:
                 if mongodb:
                     col.update_one({'_id': _id}, {'$set': {'uploaded': True}})
                 elif jsonbin:
@@ -351,12 +357,14 @@ class ArchiveYouTube:
 
             else:
                 logger.error(f'❌ Could not upload {video}!')
-                logger.error(f'❌ Status code {status_code} for video: {video}')
+                logger.error(f'❌ Request response: {resp} for video: {video}')
                 if not self.keep_failed_uploads:
                     Path(fname).unlink()
 
     def run(self) -> None:
         """Run the job."""
+        signal.signal(signal.SIGINT, keyboard_interrupt_handler)
+
         if self.no_logs:
             logger.remove()
 

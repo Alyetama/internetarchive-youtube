@@ -6,12 +6,10 @@ import requests
 
 class NoDataToInclude(Exception):
     """Raised when there is no data to include."""
-    pass
 
 
 class MissingMasterKey(Exception):
     """Raised when the master key is missing."""
-    pass
 
 
 class JSONBin:
