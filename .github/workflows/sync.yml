@@ -42,4 +42,4 @@ jobs:
       run: |
         ia configure --username="$ARCHIVE_USER_EMAIL" --password="$ARCHIVE_PASSWORD"
         ia-yt --create-collection
-        ia-yt --use-aria2c $CLI_OPTIONS
+        ia-yt --use-aria2c --no-logs $(echo $CLI_OPTIONS)

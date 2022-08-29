@@ -204,3 +204,4 @@ conf.example.py
 build_docs.sh
 *ytdl
 build.sh
+build
