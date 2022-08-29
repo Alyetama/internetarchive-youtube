@@ -312,7 +312,7 @@ class ArchiveYouTube:
                 logger.debug(f'Skipped {video} (skip list)...')
                 return
 
-        ydl_opts = {'outtmpl': base_fname}
+        ydl_opts = {'outtmpl': base_fname, 'format': 'mp4/bestaudio+bestvideo'}
 
         if self.no_logs:
             ydl_opts.update({
