@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import concurrent.futures
 import itertools
 import os
 import random
@@ -11,7 +12,6 @@ import uuid
 from pathlib import Path
 from typing import Optional, Tuple
 
-import concurrent.futures
 import pymongo
 import requests
 import yt_dlp
@@ -37,7 +37,8 @@ class ArchiveYouTube:
                  multithreading: bool = False,
                  threads: Optional[int] = None,
                  keep_failed_uploads: bool = False,
-                 ignore_video_ids: Optional[list] = None):
+                 ignore_video_ids: Optional[list] = None,
+                 use_aria2c: bool = False):
         """Initialize the class.
 
         Args:
@@ -57,6 +58,7 @@ class ArchiveYouTube:
         self.threads = threads
         self.keep_failed_uploads = keep_failed_uploads
         self.ignore_video_ids = ignore_video_ids
+        self.use_aria2c = use_aria2c
         self._data = None
 
     @staticmethod
@@ -267,7 +269,7 @@ class ArchiveYouTube:
                         logger.error(f'❌ ERROR message: {e}')
                         logger.error('❌ Failed all attempts to upload! '
                                      'Skipping...')
-                        return
+                        return str(e)
 
         if r:
             status_code = r[0].status_code
@@ -310,6 +312,11 @@ class ArchiveYouTube:
                 'no_warnings': True,
                 'noprogress': True
             })
+
+        if self.use_aria2c:
+            ydl_opts.update({
+                'external_downloader': 'aria2c'
+                })
 
         if video['downloaded'] and not video['uploaded']:
             if not Path(base_fname).exists():

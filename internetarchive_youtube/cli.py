@@ -83,9 +83,9 @@ def _opts() -> argparse.Namespace:
                         action='store_true')
     parser.add_argument('-t',
                         '--timeout',
-                        help='Kill the job after n hours (default: 5.5).',
+                        help='Kill the job after n hours (default: 5).',
                         type=float,
-                        default=5.5)
+                        default=5)
     parser.add_argument('-n',
                         '--no-logs',
                         help='Don\'t print any log messages.',
@@ -131,6 +131,12 @@ def _opts() -> argparse.Namespace:
                         help='Comma-separated list or a path to a file '
                         'containing a list of video ids to ignore.',
                         type=str)
+    parser.add_argument(
+        '-A',
+        '--use-aria2c',
+        help='Use external downloader, aria2c '
+        '(can significantly speed up download).',
+        action='store_true')
     return parser.parse_args()
 
 
@@ -211,7 +217,8 @@ def main() -> None:
                              multithreading=args.multithreading,
                              threads=args.threads,
                              keep_failed_uploads=args.keep_failed_uploads,
-                             ignore_video_ids=args.ignore_video_ids)
+                             ignore_video_ids=args.ignore_video_ids,
+                             use_aria2c=args.use_aria2c)
         ayt.run()
     except TimeLimitReached:
         return

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "internetarchive-youtube"
-version = "0.3.0"
+version = "0.3.1"
 description = "Archives YouTube channels by automatically uploading their videos to archive.org"
 authors = ["Mohammad Alyetama <malyetama@pm.me>"]
 license = "MIT"
