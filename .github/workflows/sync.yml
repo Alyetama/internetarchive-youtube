@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */1 * * *'
 
 permissions:
   contents: read
@@ -23,8 +23,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install -r requirements.txt
         pip install 'poetry>=1.1.13'
+        apt-get update
+        apt-get install aria2c -y
     - name: Build
       run: |
         poetry build
@@ -33,11 +35,11 @@ jobs:
       env:
         ARCHIVE_USER_EMAIL: ${{ secrets.ARCHIVE_USER_EMAIL }}
         ARCHIVE_PASSWORD: ${{ secrets.ARCHIVE_PASSWORD }}
-        CHANNELS: ${{ secrets.CHANNELS }}
+        CHANNELS: ${{ secrets.WATCHGOD_CHANNELS }}
         MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
         CLI_OPTIONS: ${{ secrets.CLI_OPTIONS }}
       run: |
         ia configure --username="$ARCHIVE_USER_EMAIL" --password="$ARCHIVE_PASSWORD"
         ia-yt --create-collection
-        ia-yt $CLI_OPTIONS
+        ia-yt --use-aria2c $CLI_OPTIONS

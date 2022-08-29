@@ -150,6 +150,8 @@ options:
 <details>
   <summary>Creating A Backend Database instructions</summary>
 
+  **NOTICE: The `JSONBIN` option will not work at the moment because jsonbin.io changed their API recently. Please use MongoDB for now until the next release.**
+
 - **Option 1:**  MongoDB (recommended).
   - Self-hosted (see: [Alyetama/quick-MongoDB](https://github.com/Alyetama/quick-MongoDB) or [dockerhub image](https://hub.docker.com/_/mongo)).
   - Free cloud database on [Atlas](https://www.mongodb.com/database/free).
