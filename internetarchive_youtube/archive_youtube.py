@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import concurrent.futures
+import contextlib
 import itertools
 import os
 import random
@@ -22,6 +23,15 @@ from internetarchive_youtube.jsonbin_manager import JSONBin
 from loguru import logger
 from pymongo.collection import Collection
 from tqdm import tqdm
+
+
+@contextlib.contextmanager
+def _suppress_stdout_stderr():
+    """A context manager that redirects stdout and stderr to devnull"""
+    with open(os.devnull, 'w') as fnull:
+        with contextlib.redirect_stderr(
+                fnull) as err, contextlib.redirect_stdout(fnull) as out:
+            yield (err, out)
 
 
 class NoStorageSecretFound(Exception):
@@ -188,8 +198,8 @@ class ArchiveYouTube:
         }
         return _id, title, md, identifier
 
-    @staticmethod
-    def download(video: dict, ydl_opts: dict, fname: str) -> Optional[bool]:
+    def download(self, video: dict, ydl_opts: dict,
+                 fname: str) -> Optional[bool]:
         """Download the video.
 
         Args:
@@ -204,9 +214,14 @@ class ArchiveYouTube:
                      f'{video["title"]}; YT URL: {video["url"]}')
 
         try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                # info_dict = ydl.extract_info(video['url'], download=False)
-                ydl.download(video['url'])
+            if self.no_logs:
+                with _suppress_stdout_stderr():
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.download(video['url'])
+            else:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download(video['url'])
+
         except yt_dlp.utils.DownloadError as e:
             logger.error(f'❌ Failed to download! ERROR message: {e}')
             logger.error(f'❌ Skipping ({video["url"]})...')
@@ -331,7 +346,9 @@ class ArchiveYouTube:
             ydl_opts.update({
                 'quiet': True,
                 'no_warnings': True,
-                'noprogress': True
+                'noprogress': True,
+                'verbose': False,
+                'logtostderr': True
             })
 
         if self.use_aria2c:
