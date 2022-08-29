@@ -281,6 +281,12 @@ class ArchiveYouTube:
                         logger.error('❌ Failed all attempts to upload! '
                                      'Skipping...')
                         return str(e)
+            elif 'been taken offline' in str(e):
+                identifier = f'{identifier}-{str(uuid.uuid4())[:4]}'
+                try:
+                    r = upload(identifier, files=[fname], metadata=md)
+                except requests.exceptions.HTTPError as e:
+                    logger.error(f'❌ ERROR message: {e}')
             else:
                 return str(e)
 
