@@ -22,11 +22,11 @@ jobs:
         python-version: "3.9"
     - name: Install dependencies
       run: |
+        sudo apt-get update
+        sudo apt-get install aria2 -y
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install 'poetry>=1.1.13'
-        apt-get update
-        apt-get install aria2c -y
     - name: Build
       run: |
         poetry build
@@ -35,7 +35,7 @@ jobs:
       env:
         ARCHIVE_USER_EMAIL: ${{ secrets.ARCHIVE_USER_EMAIL }}
         ARCHIVE_PASSWORD: ${{ secrets.ARCHIVE_PASSWORD }}
-        CHANNELS: ${{ secrets.WATCHGOD_CHANNELS }}
+        CHANNELS: ${{ secrets.CHANNELS }}
         MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
         JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
         CLI_OPTIONS: ${{ secrets.CLI_OPTIONS }}
