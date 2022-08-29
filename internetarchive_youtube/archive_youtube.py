@@ -62,10 +62,15 @@ class ArchiveYouTube:
         self.use_aria2c = use_aria2c
         self._data = None
 
-    @staticmethod
-    def keyboard_interrupt_handler(sig: int, _) -> None:
+    def keyboard_interrupt_handler(self, sig: int, _) -> None:
         logger.warning(f'\nKeyboardInterrupt (id: {sig}) has been caught...')
         logger.warning('Terminating the session gracefully...')
+        if not self.keep_failed_uploads:
+            tmp_files = [
+                list(Path('.').glob(f'*{x}'))
+                for x in ['.mp4', '.ytdl', '.part']
+            ]
+            _ = [x.unlink() for x in sum(tmp_files, [])]
         sys.exit(1)
 
     @staticmethod
@@ -305,14 +310,15 @@ class ArchiveYouTube:
             logger.debug('Refreshing the database...')
             mongodb, jsonbin, col, jb, bin_id, self._data = self.load_data()
 
-        _id, base_fname, md, identifier = self.create_metadata(video)
+        _id, title, md, identifier = self.create_metadata(video)
+        fname = f'{title}.mp4'
 
         if self.skip_list:
             if _id in self.skip_list:
                 logger.debug(f'Skipped {video} (skip list)...')
                 return
 
-        ydl_opts = {'outtmpl': base_fname, 'format': 'mp4/bestaudio+bestvideo'}
+        ydl_opts = {'outtmpl': fname, 'format': 'mp4/bestaudio+bestvideo'}
 
         if self.no_logs:
             ydl_opts.update({
@@ -325,11 +331,11 @@ class ArchiveYouTube:
             ydl_opts.update({'external_downloader': 'aria2c'})
 
         if video['downloaded'] and not video['uploaded']:
-            if not Path(base_fname).exists():
+            if not Path(fname).exists():
                 video['downloaded'] = False
 
         if not video['downloaded']:
-            is_downloaded = self.download(video, ydl_opts, base_fname)
+            is_downloaded = self.download(video, ydl_opts, fname)
             if not is_downloaded:
                 return
 
@@ -342,8 +348,6 @@ class ArchiveYouTube:
             time.sleep(3)
 
         if not video['uploaded']:
-            suffix = list(Path('.').glob(f'*{base_fname}*'))[0].suffix
-            fname = f'{base_fname}{suffix}'
             resp = self.upload(video, md, identifier, fname)
 
             if resp == 200:
