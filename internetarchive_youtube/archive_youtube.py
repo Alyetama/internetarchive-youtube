@@ -312,6 +312,7 @@ class ArchiveYouTube:
                 logger.debug(
                     f'Video with id {video["_id"]} is on the ignore list. '
                     'Skipping...')
+                return
         if self.force_refresh:
             logger.debug('Refreshing the database...')
             mongodb, jsonbin, col, jb, bin_id, self._data = self.load_data()
@@ -367,9 +368,14 @@ class ArchiveYouTube:
 
             else:
                 logger.error(f'❌ Could not upload {video}!')
-                logger.error(f'❌ Request response: {resp} for video: {video}')
+                logger.error(f'❌ Request response: {resp}.')
                 if not self.keep_failed_uploads:
                     Path(fname).unlink()
+                else:
+                    if not self.no_logs:
+                        md_str = '\n'.join(
+                            [f'{k}: {v}' for k, v in md.items()])
+                        print('-' * 80, '\n', md_str, '\n', '-' * 80)
 
     def run(self) -> None:
         """Run the job."""
