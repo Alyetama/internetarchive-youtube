@@ -68,7 +68,7 @@ class ArchiveYouTube:
         if not self.keep_failed_uploads:
             tmp_files = [
                 list(Path('.').glob(f'*{x}'))
-                for x in ['.mp4', '.ytdl', '.part']
+                for x in ['.mp4', '.ytdl', '.part', '.aria2']
             ]
             _ = [x.unlink() for x in sum(tmp_files, [])]
         sys.exit(1)
