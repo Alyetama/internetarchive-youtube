@@ -68,7 +68,7 @@ class CreateCollection:
               '\'{"upload_date": "%(upload_date)s", ' \
               '"title": "%(title)s", "url": ' \
               f'"{base_url}%(id)s", ' \
-              '"downloaded": false, "uploaded": false}\' ' + \
+              '"downloaded": false, "uploaded": false}, \' ' + \
               f'"{self.channel_url}"'
         return cmd
 
