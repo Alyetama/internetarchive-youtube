@@ -120,11 +120,15 @@ class CreateCollection:
 
         cmd_last_ten = self.info_cmd(playlist_end='--playlist-end 10')
 
-        p_last_ten = subprocess.run(shlex.split(cmd_last_ten),
-                                    shell=False,
-                                    check=True,
-                                    capture_output=True,
-                                    text=True)
+        try:
+            p_last_ten = subprocess.run(shlex.split(cmd_last_ten),
+                                        shell=False,
+                                        check=True,
+                                        capture_output=True,
+                                        text=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(e)
+            print(e)
         data = json.loads(f'[{p_last_ten.stdout.strip()[:-1]}]')
         data = self.append_data(data)
 
