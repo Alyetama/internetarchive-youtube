@@ -19,10 +19,11 @@ import pymongo
 import requests
 import yt_dlp
 from internetarchive import get_item, upload
-from internetarchive_youtube.jsonbin_manager import JSONBin
 from loguru import logger
 from pymongo.collection import Collection
 from tqdm import tqdm
+
+from internetarchive_youtube.jsonbin_manager import JSONBin
 
 
 @contextlib.contextmanager
@@ -100,6 +101,17 @@ class ArchiveYouTube:
         clean_name = re.sub(r'_{2,}', '_', fname)
         return clean_name
 
+    @staticmethod
+    def get_video_extension(video_url):
+        with yt_dlp.YoutubeDL({'quiet': True, 'format': 'best'}) as ydl:
+            try:
+                info = ydl.extract_info(video_url, download=False)
+            except Exception as e:
+                if 'Private video' in str(e) or 'Video unavailable' in str(e):
+                    return 'not available'
+            filename = ydl.prepare_filename(info)
+            return Path(filename).suffix
+
     def load_data(
         self
     ) -> Tuple[bool, bool, Optional[Collection], Optional[JSONBin],
@@ -135,6 +147,10 @@ class ArchiveYouTube:
                                        '`JSONBIN_KEY`!')
 
         data = [x for x in data if not x['downloaded'] or not x['uploaded']]
+        data = [
+            x for x in data if x['downloaded'] != 'not available'
+            or x['uploaded'] != 'not available'
+        ]
 
         random.shuffle(data)
 
@@ -225,6 +241,9 @@ class ArchiveYouTube:
         except yt_dlp.utils.DownloadError as e:
             logger.error(f'❌ Failed to download! ERROR message: {e}')
             logger.error(f'❌ Skipping ({video["url"]})...')
+
+            if 'Private video' in str(e) or 'Video unavailable' in str(e):
+                return 'not available'
 
             logger.debug('Removing temporary files...')
             files_here = Path('.').glob('*')
@@ -333,14 +352,28 @@ class ArchiveYouTube:
             mongodb, jsonbin, col, jb, bin_id, self._data = self.load_data()
 
         _id, title, md, identifier = self.create_metadata(video)
-        fname = f'{title}.mp4'
+        f_suffix = self.get_video_extension(video['url'])
+        if f_suffix == 'not available':
+            if mongodb:
+                col.update_one({'_id': _id}, {
+                    '$set': {
+                        'downloaded': 'not available',
+                        'uploaded': 'not available'
+                    }
+                })
+            elif jsonbin:
+                video['downloaded'] = 'not available'
+                video['uploaded'] = 'not available'
+                jb.update_bin(bin_id, self._data)
+            return
+        fname = f'{title}{f_suffix}'
 
         if self.skip_list:
             if _id in self.skip_list:
                 logger.debug(f'Skipped {video} (skip list)...')
                 return
 
-        ydl_opts = {'outtmpl': fname, 'format': 'mp4/bestaudio+bestvideo'}
+        ydl_opts = {'outtmpl': fname, 'format': 'best'}
 
         if self.no_logs:
             ydl_opts.update({
@@ -364,10 +397,20 @@ class ArchiveYouTube:
                 return
 
             if mongodb:
-                col.update_one({'_id': _id}, {'$set': {'downloaded': True}})
+                col.update_one({'_id': _id}, {
+                    '$set': {
+                        'downloaded': is_downloaded,
+                        'uploaded': is_downloaded
+                    }
+                })
             elif jsonbin:
-                video['downloaded'] = True
+                video['downloaded'] = is_downloaded
+                video['uploaded'] = is_downloaded
                 jb.update_bin(bin_id, self._data)
+
+            if is_downloaded == 'not available':
+                return
+
             logger.debug('✅ Downloaded!')
             time.sleep(3)
 
