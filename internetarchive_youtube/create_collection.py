@@ -147,9 +147,13 @@ class CreateCollection:
             cmd = self.info_cmd(self.channel_url)
             p = subprocess.run(shlex.split(cmd),
                                shell=False,
-                               check=True,
+                               check=False,
                                capture_output=True,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE,
                                text=True)
+            print(p.stdout)
+            print(p.stderr)
             data = json.loads(f'[{p.stdout.strip()[:-1]}]')
             data = self.append_data(data)
 
