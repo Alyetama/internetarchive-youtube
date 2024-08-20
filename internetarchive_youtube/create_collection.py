@@ -124,8 +124,6 @@ class CreateCollection:
                                     shell=False,
                                     check=False,
                                     capture_output=True,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
                                     text=True)
         print(p_last_ten.stdout)
         print(p_last_ten.stderr)
