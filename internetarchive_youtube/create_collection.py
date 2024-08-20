@@ -122,9 +122,13 @@ class CreateCollection:
 
         p_last_ten = subprocess.run(shlex.split(cmd_last_ten),
                                     shell=False,
-                                    check=True,
+                                    check=False,
                                     capture_output=True,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
                                     text=True)
+        print(p_last_ten.stdout)
+        print(p_last_ten.stderr)
         data = json.loads(f'[{p_last_ten.stdout.strip()[:-1]}]')
         data = self.append_data(data)
 
