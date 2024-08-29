@@ -130,7 +130,7 @@ class CreateCollection:
 
         last_ten_ids = [x['_id'] for x in data]
 
-        if all(True if x in last_ten_ids else False for x in existing_ids):
+        if existing_ids and all(True if x in last_ten_ids else False for x in existing_ids):
             logger.debug(
                 f'{self.channel_name} is up-to-date! Nothing to do...')
             return
