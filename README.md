@@ -50,7 +50,7 @@ Don't add any quotes around the name or the URL, and make sure to keep one space
 
 If you picked **option 1 (MongoDB)**, add this secret:
   - `MONGODB_CONNECTION_STRING`
-The value of the secret is the database conneciton string.
+The value of the secret is the database connection string.
 
 If you picked **option 2 (JSON bin)**, add this additional secret:
   - `JSONBIN_KEY`  
