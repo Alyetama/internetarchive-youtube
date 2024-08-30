@@ -103,7 +103,7 @@ class ArchiveYouTube:
 
     @staticmethod
     def get_video_extension(video_url):
-        with yt_dlp.YoutubeDL({'quiet': True, 'format': 'best'}) as ydl:
+        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
             try:
                 info = ydl.extract_info(video_url, download=False)
             except Exception as e:
@@ -373,7 +373,7 @@ class ArchiveYouTube:
                 logger.debug(f'Skipped {video} (skip list)...')
                 return
 
-        ydl_opts = {'outtmpl': fname, 'format': 'best'}
+        ydl_opts = {'outtmpl': fname}
 
         if self.no_logs:
             ydl_opts.update({
