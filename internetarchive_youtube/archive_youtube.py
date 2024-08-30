@@ -263,7 +263,7 @@ class ArchiveYouTube:
 
     @staticmethod
     def upload(video: dict, md: dict, identifier: str,
-               fname: str) -> Optional[int]:
+               fname: str, verbose: bool) -> Optional[int]:
         """Upload the video.
 
         Args:
@@ -292,7 +292,7 @@ class ArchiveYouTube:
 
         r = None
         try:
-            r = upload(identifier, files=[fname], metadata=md)
+            r = upload(identifier, files=[fname], metadata=md, verbose=verbose)
         except requests.exceptions.HTTPError as e:
             if 'Slow Down' in str(e) or 'reduce your request rate' in str(e):
                 logger.error(f'❌ Error with video: {video}')
@@ -302,14 +302,14 @@ class ArchiveYouTube:
                 logger.debug('Trying to upload again...')
 
                 try:
-                    r = upload(identifier, files=[fname], metadata=md)
+                    r = upload(identifier, files=[fname], metadata=md, verbose=verbose)
                 except requests.exceptions.HTTPError as e:
                     logger.error('❌ Failed again!')
                     logger.error(f'❌ ERROR message: {e}')
 
                     try:
                         identifier = str(uuid.uuid4())
-                        r = upload(identifier, files=[fname], metadata=md)
+                        r = upload(identifier, files=[fname], metadata=md, verbose=verbose)
                     except requests.exceptions.HTTPError as e:
                         logger.error(f'❌ ERROR message: {e}')
                         logger.error('❌ Failed all attempts to upload! '
@@ -318,7 +318,7 @@ class ArchiveYouTube:
             elif 'been taken offline' in str(e):
                 identifier = f'{identifier}-{str(uuid.uuid4())[:4]}'
                 try:
-                    r = upload(identifier, files=[fname], metadata=md)
+                    r = upload(identifier, files=[fname], metadata=md, verbose=verbose)
                 except requests.exceptions.HTTPError as e:
                     logger.error(f'❌ ERROR message: {e}')
             else:
@@ -415,7 +415,7 @@ class ArchiveYouTube:
             time.sleep(3)
 
         if not video['uploaded']:
-            resp = self.upload(video, md, identifier, fname)
+            resp = self.upload(video, md, identifier, fname, not self.no_logs)
 
             if resp == 200:
                 if mongodb:
