@@ -69,7 +69,7 @@ class CreateCollection:
               '"title": "%(title)s", "url": ' \
               f'"{base_url}%(id)s", ' \
               '"downloaded": false, "uploaded": false}, \' ' + \
-              f'"{self.channel_url}"'
+              f'"{self.channel_url}" {"--cookies " + os.getenv("COOKIES") if os.getenv("COOKIES") else ""}'
         return cmd
 
     def append_data(self, data: list) -> list:
