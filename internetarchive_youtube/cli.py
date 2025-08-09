@@ -32,37 +32,6 @@ def _alarm_handler(signum: int, _: object):
         'The GitHub action is about to die. Terminating the job safely...')
 
 
-def _create_collection(no_logs: bool = False) -> None:
-    """Creates a collection from the channels list.
-
-    Args:
-        no_logs: Whether to print logs.
-    """
-    channels = os.getenv('CHANNELS')
-    if not channels:
-        raise TypeError('`CHANNELS` cannot be empty!')
-
-    if channels.startswith('http'):
-        channels = requests.get(channels).text
-
-    elif Path(channels).exists():
-        with open(channels) as f:
-            channels = f.read()
-
-    try:
-        channels = json.loads(channels).items()
-    except json.decoder.JSONDecodeError:
-        channels = [tuple(x.split(': ')) for x in channels.strip().split('\n')]
-
-    random.shuffle(channels)
-
-    for channel in channels:
-        if not no_logs:
-            print(f'Current channel: {channel}')
-        cc = CreateCollection(channel[0], channel[1], no_logs=no_logs)
-        _ = cc.create_collection()
-
-
 def _opts() -> argparse.Namespace:
     """Parses the command line arguments."""
     parser = argparse.ArgumentParser()
@@ -136,7 +105,46 @@ def _opts() -> argparse.Namespace:
                         help='Use external downloader, aria2c '
                         '(can significantly speed up download).',
                         action='store_true')
+    parser.add_argument('-SC',
+                        '--specific-channel',
+                        help='Archive one specific channel',
+                        type=str)
     return parser.parse_args()
+
+
+def _create_collection(no_logs: bool = False) -> None:
+    """Creates a collection from the channels list.
+
+    Args:
+        no_logs: Whether to print logs.
+    """
+    args = _opts()
+    if args.channels_file:
+        channels = args.channels_file
+    else:
+        channels = os.getenv('CHANNELS')
+    if not channels:
+        raise TypeError('`CHANNELS` cannot be empty!')
+
+    if channels.startswith('http'):
+        channels = requests.get(channels).text
+
+    elif Path(channels).exists():
+        with open(channels) as f:
+            channels = f.read()
+
+    try:
+        channels = json.loads(channels).items()
+    except json.decoder.JSONDecodeError:
+        channels = [tuple(x.split(': ')) for x in channels.strip().split('\n')]
+
+    random.shuffle(channels)
+
+    for channel in channels:
+        if not no_logs:
+            print(f'Current channel: {channel}')
+        cc = CreateCollection(channel[0], channel[1], no_logs=no_logs)
+        _ = cc.create_collection()
 
 
 def main() -> None:
@@ -218,7 +226,8 @@ def main() -> None:
                              threads=args.threads,
                              keep_failed_uploads=args.keep_failed_uploads,
                              ignore_video_ids=args.ignore_video_ids,
-                             use_aria2c=args.use_aria2c)
+                             use_aria2c=args.use_aria2c,
+                             specific_channel=args.specific_channel)
         ayt.run()
     except TimeLimitReached:
         return
