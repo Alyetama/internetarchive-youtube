@@ -50,7 +50,8 @@ class ArchiveYouTube:
                  keep_failed_uploads: bool = False,
                  ignore_video_ids: Optional[list] = None,
                  use_aria2c: bool = False,
-                 specific_channel: str = None):
+                 specific_channel: str = None,
+                 cookies_file: str = None):
         """Initialize the class.
 
         Args:
@@ -72,6 +73,7 @@ class ArchiveYouTube:
         self.ignore_video_ids = ignore_video_ids
         self.use_aria2c = use_aria2c
         self.specific_channel = specific_channel
+        self.cookies_file = cookies_file
         self._data = None
 
     def keyboard_interrupt_handler(self, sig: int, _) -> None:
@@ -102,9 +104,11 @@ class ArchiveYouTube:
         clean_name = re.sub(r'_{2,}', '_', fname)
         return clean_name
 
-    @staticmethod
-    def get_video_extension(video_url):
-        with yt_dlp.YoutubeDL({'quiet': True, 'format': 'best'}) as ydl:
+    def get_video_extension(self, video_url):
+        ydl_opts = {'quiet': True, 'format': 'best'}
+        if self.cookies_file:
+            ydl_opts.update({'cookiefile': self.cookies_file})
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             try:
                 info = ydl.extract_info(video_url, download=False)
             except Exception as e:
@@ -388,6 +392,9 @@ class ArchiveYouTube:
                 'verbose': False,
                 'logtostderr': True
             })
+
+        if self.cookies_file:
+            ydl_opts.update({'cookiefile': self.cookies_file})
 
         if self.use_aria2c:
             ydl_opts.update({'external_downloader': 'aria2c'})

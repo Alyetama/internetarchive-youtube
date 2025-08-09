@@ -109,6 +109,10 @@ def _opts() -> argparse.Namespace:
                         '--specific-channel',
                         help='Archive one specific channel',
                         type=str)
+    parser.add_argument('-co',
+                        '--cookies-file',
+                        help='Path to the YouTube cookies file',
+                        type=str)
     return parser.parse_args()
 
 
@@ -143,7 +147,7 @@ def _create_collection(no_logs: bool = False) -> None:
     for channel in channels:
         if not no_logs:
             print(f'Current channel: {channel}')
-        cc = CreateCollection(channel[0], channel[1], no_logs=no_logs)
+        cc = CreateCollection(channel[0], channel[1], no_logs=no_logs, cookies_file=args.cookies_file)
         _ = cc.create_collection()
 
 
@@ -227,7 +231,8 @@ def main() -> None:
                              keep_failed_uploads=args.keep_failed_uploads,
                              ignore_video_ids=args.ignore_video_ids,
                              use_aria2c=args.use_aria2c,
-                             specific_channel=args.specific_channel)
+                             specific_channel=args.specific_channel,
+                             cookies_file=args.cookies_file)
         ayt.run()
     except TimeLimitReached:
         return
