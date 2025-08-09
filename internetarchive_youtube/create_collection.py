@@ -26,7 +26,8 @@ class CreateCollection:
     def __init__(self,
                  channel_name: str,
                  channel_url: str,
-                 no_logs: bool = False) -> None:
+                 no_logs: bool = False,
+                 cookies_file: str = None) -> None:
         """Initialize the class.
 
         Args:
@@ -38,6 +39,7 @@ class CreateCollection:
         self.channel_name = channel_name
         self.channel_url = channel_url
         self.no_logs = no_logs
+        self.cookies_file = cookies_file
 
     @staticmethod
     def mongodb_client() -> Database:
@@ -64,7 +66,11 @@ class CreateCollection:
         #     base_url = 'https://www.twitch.tv/videos/'
 
         base_url = 'https://www.youtube.com/watch?v='
-        cmd = f'yt-dlp {playlist_end} --get-filename -o ' \
+        if self.cookies_file:
+            cmd_prefix = f'yt-dlp --cookies {self.cookies_file}'
+        else:
+            cmd_prefix = f'yt-dlp'
+        cmd = f'{cmd_prefix} {playlist_end} --get-filename -o ' \
               '\'{"upload_date": "%(upload_date)s", ' \
               '"title": "%(title)s", "url": ' \
               f'"{base_url}%(id)s", ' \
