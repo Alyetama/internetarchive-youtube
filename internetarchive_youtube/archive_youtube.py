@@ -19,11 +19,10 @@ import pymongo
 import requests
 import yt_dlp
 from internetarchive import get_item, upload
+from internetarchive_youtube.jsonbin_manager import JSONBin
 from loguru import logger
 from pymongo.collection import Collection
 from tqdm import tqdm
-
-from internetarchive_youtube.jsonbin_manager import JSONBin
 
 
 @contextlib.contextmanager
@@ -50,7 +49,8 @@ class ArchiveYouTube:
                  threads: Optional[int] = None,
                  keep_failed_uploads: bool = False,
                  ignore_video_ids: Optional[list] = None,
-                 use_aria2c: bool = False):
+                 use_aria2c: bool = False,
+                 specific_channel: str = None):
         """Initialize the class.
 
         Args:
@@ -71,6 +71,7 @@ class ArchiveYouTube:
         self.keep_failed_uploads = keep_failed_uploads
         self.ignore_video_ids = ignore_video_ids
         self.use_aria2c = use_aria2c
+        self.specific_channel = specific_channel
         self._data = None
 
     def keyboard_interrupt_handler(self, sig: int, _) -> None:
@@ -167,6 +168,10 @@ class ArchiveYouTube:
                 else:
                     second.append(item)
             data = first + second
+        if self.specific_channel:
+            data = [
+                x for x in data if x['channel_name'] == self.specific_channel
+            ]
         return mongodb, jsonbin, col, jb, bin_id, data
 
     def create_metadata(self, video: dict) -> Tuple[str, str, dict, str]:
