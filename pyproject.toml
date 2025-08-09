@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "internetarchive-youtube"
-version = "0.3.5"
+version = "0.3.6"
 description = "Archives YouTube channels by automatically uploading their videos to archive.org"
 authors = ["Mohammad Alyetama <malyetama@pm.me>"]
 license = "MIT"
@@ -25,5 +25,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 ia-yt = 'internetarchive_youtube:cli.main'
 ia_yt = 'internetarchive_youtube:cli.main'
-internetarchive-youtube = 'internetarchive_youtub:cli.main'
-internetarchive_youtube = 'internetarchive_youtub:cli.main'
+internetarchive-youtube = 'internetarchive_youtube:cli.main'
+internetarchive_youtube = 'internetarchive_youtube:cli.main'
