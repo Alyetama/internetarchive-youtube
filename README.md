@@ -113,7 +113,7 @@ source "$HOME/.$(basename $SHELL)rc"
 #### ⌨️ Usage:
 
 ```
-usage: ia-yt [-h] [-p PRIORITIZE] [-s SKIP_LIST] [-f] [-t TIMEOUT] [-n] [-a] [-c CHANNELS_FILE] [-S] [-C] [-m] [-T THREADS] [-k] [-i IGNORE_VIDEO_IDS]
+usage: ia-yt [-h] [-p PRIORITIZE] [-s SKIP_LIST] [-f] [-t TIMEOUT] [-n] [-a] [-c CHANNELS_FILE] [-S] [-C] [-m] [-T THREADS] [-k] [-i IGNORE_VIDEO_IDS] [-A] [-SC SPECIFIC_CHANNEL] [-co COOKIES_FILE]
 
 options:
   -h, --help            show this help message and exit
@@ -124,7 +124,7 @@ options:
   -f, --force-refresh   Refresh the database after every video (Can slow down the workflow significantly, but is useful when running multiple concurrent
                         jobs).
   -t TIMEOUT, --timeout TIMEOUT
-                        Kill the job after n hours (default: 5.5).
+                        Kill the job after n hours (default: 5).
   -n, --no-logs         Don't print any log messages.
   -a, --add-channel     Add a channel interactively to the list of channels to archive.
   -c CHANNELS_FILE, --channels-file CHANNELS_FILE
@@ -139,6 +139,11 @@ options:
                         Keep the files of failed uploads on the local disk.
   -i IGNORE_VIDEO_IDS, --ignore-video-ids IGNORE_VIDEO_IDS
                         Comma-separated list or a path to a file containing a list of video ids to ignore.
+  -A, --use-aria2c      Use external downloader aria2c (can significantly speed up downloads).
+  -SC SPECIFIC_CHANNEL, --specific-channel SPECIFIC_CHANNEL
+                        Archive one specific channel by name.
+  -co COOKIES_FILE, --cookies-file COOKIES_FILE
+                        Path to a YouTube cookies file (for age-restricted or private videos).
 ```
 
 </details>
@@ -149,8 +154,6 @@ options:
 
 <details>
   <summary>Creating A Backend Database instructions</summary>
-
-  **NOTICE: The `JSONBIN` option will not work at the moment because jsonbin.io changed their API recently. Please use MongoDB for now until the next release.**
 
 - **Option 1:**  MongoDB (recommended).
   - Self-hosted (see: [Alyetama/quick-MongoDB](https://github.com/Alyetama/quick-MongoDB) or [dockerhub image](https://hub.docker.com/_/mongo)).
