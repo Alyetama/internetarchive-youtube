@@ -119,7 +119,7 @@ class CreateCollection:
             jb = JSONBin(os.getenv('JSONBIN_KEY'))
             try:
                 bin_id = jb.handle_collection_bins()
-                existing_data = jb.read_bin(bin_id)
+                existing_data = jb.read_bin(bin_id)['record']
                 existing_ids = [x.get('_id') for x in existing_data]
             except NoDataToInclude:
                 pass
