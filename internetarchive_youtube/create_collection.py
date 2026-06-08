@@ -136,13 +136,13 @@ class CreateCollection:
 
         last_ten_ids = [x['_id'] for x in data]
 
-        if all(True if x in last_ten_ids else False for x in existing_ids):
+        if last_ten_ids and all(x in existing_ids for x in last_ten_ids):
             logger.debug(
                 f'{self.channel_name} is up-to-date! Nothing to do...')
             return
         else:
             data = [x for x in data if x['_id'] not in existing_ids]
-            if 10 > len(data):
+            if len(data) < 10:
                 skip_full_download = True
                 logger.debug(f'Found {len(data)} new videos...')
 
@@ -150,7 +150,7 @@ class CreateCollection:
             logger.debug(
                 'Downloading the entire channel metadata... This might take '
                 'few minutes...')
-            cmd = self.info_cmd(self.channel_url)
+            cmd = self.info_cmd()
             p = subprocess.run(shlex.split(cmd),
                                shell=False,
                                check=True,
