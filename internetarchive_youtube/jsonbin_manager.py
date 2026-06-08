@@ -3,6 +3,9 @@
 
 import requests
 
+BASE_URL = 'https://api.jsonbin.io/v3'
+COLLECTION_NAME = 'yt_archive_sync_collection'
+
 
 class NoDataToInclude(Exception):
     """Raised when there is no data to include."""
@@ -10,6 +13,10 @@ class NoDataToInclude(Exception):
 
 class MissingMasterKey(Exception):
     """Raised when the master key is missing."""
+
+
+class JSONBinError(Exception):
+    """Raised when the JSONBin API returns an error response."""
 
 
 class JSONBin:
@@ -25,87 +32,106 @@ class JSONBin:
         self.jsonbin_key = jsonbin_key
         self.no_logs = no_logs
 
-    def handle_collection_bins(self, include_data=None):
-        """Handle the collection bins.
+    @property
+    def _auth(self) -> dict:
+        return {'X-Master-Key': self.jsonbin_key}
+
+    def _check(self, resp: requests.Response) -> object:
+        """Raise on HTTP error or API-level error message."""
+        resp.raise_for_status()
+        data = resp.json()
+        if isinstance(data, dict) and 'message' in data:
+            raise JSONBinError(data['message'])
+        return data
+
+    def handle_collection_bins(self, include_data=None) -> str:
+        """Return the DATA bin ID, creating the collection/bin if needed.
 
         Args:
-            include_data: Whether to include data or not.
+            include_data: Initial records to store when creating a new bin.
+
+        Returns:
+            The bin ID string.
         """
         if not self.jsonbin_key:
-            raise MissingMasterKey('The secret JSONBIN token can\'t be None!')
+            raise MissingMasterKey("The secret JSONBIN token can't be None!")
 
-        url = 'https://api.jsonbin.io/v3'
+        # --- Find or create the collection ---
+        collections = self._check(
+            requests.get(f'{BASE_URL}/c', headers=self._auth))
 
-        headers = {
-            'X-Collection-Name': 'yt_archive_sync_collection',
-            'X-Master-Key': self.jsonbin_key
-        }
-        data = {}
+        collection_id = None
+        for col in collections:
+            if col.get('collectionMeta', {}).get('name') == COLLECTION_NAME:
+                collection_id = col['record']
+                break
 
-        # CREATE A COLLECTION
+        if not collection_id:
+            data = self._check(
+                requests.post(f'{BASE_URL}/c',
+                              json={},
+                              headers={
+                                  **self._auth,
+                                  'X-Collection-Name': COLLECTION_NAME
+                              }))
+            collection_id = data['record']
 
-        resp = requests.post(f'{url}/c', json=data, headers=headers).json()
-        if resp.get('record'):
-            collection_id = resp['record']
-        else:
-            resp = requests.get(f'{url}/c', json=data, headers=headers)
-            collection_id = resp.json()[0]['record']
+        # --- Find or create the DATA bin ---
+        bins = self._check(
+            requests.get(f'{BASE_URL}/c/{collection_id}/bins',
+                         headers=self._auth))
 
-        # LIST THE BINS OF THE COLLECTION
+        bin_id = None
+        for b in bins:
+            if b.get('snippetMeta', {}).get('name') == 'DATA':
+                bin_id = b['record']
+                break
 
-        resp = requests.get(f'{url}/c/{collection_id}/bins',
-                            json=data,
-                            headers=headers)
-
-        bin_id = [
-            b['record'] for b in resp.json()
-            if b['snippetMeta']['name'] == 'DATA'
-        ]
-        if bin_id:
-            # If the bin exists, return it
-            bin_id = bin_id[0]
-        else:
-            # If not (first run), create a bin with the initial data
+        if not bin_id:
             if not include_data:
                 raise NoDataToInclude
             if not self.no_logs:
                 print('Creating a new bin...')
-            headers.update({
-                'X-Bin-Name': 'DATA',
-                'Content-Type': 'application/json',
-                'X-Collection-Id': collection_id
-            })
-            resp = requests.post(f'{url}/b',
-                                 json=include_data,
-                                 headers=headers)
-            bin_id = resp.json()['metadata']['id']
+            data = self._check(
+                requests.post(f'{BASE_URL}/b',
+                              json=include_data,
+                              headers={
+                                  **self._auth,
+                                  'Content-Type': 'application/json',
+                                  'X-Bin-Name': 'DATA',
+                                  'X-Collection-Id': collection_id,
+                              }))
+            bin_id = data['metadata']['id']
 
         return bin_id
 
-    def read_bin(self, bin_id):
-        """Reads the bin.
+    def read_bin(self, bin_id: str) -> dict:
+        """Read a bin and return the full API response.
 
         Args:
             bin_id: The bin ID.
-        """
-        url = 'https://api.jsonbin.io/v3'
-        headers = {'X-Master-Key': self.jsonbin_key}
-        read_resp = requests.get(f'{url}/b/{bin_id}', headers=headers)
-        return read_resp.json()
 
-    def update_bin(self, bin_id, data):
-        """Updates the bin.
+        Returns:
+            The full response dict with 'record' and 'metadata' keys.
+        """
+        return self._check(
+            requests.get(f'{BASE_URL}/b/{bin_id}', headers=self._auth))
+
+    def update_bin(self, bin_id: str, data) -> dict:
+        """Replace the bin contents.
 
         Args:
             bin_id: The bin ID.
-            data: The data to update.
+            data: The new data to store.
+
+        Returns:
+            The API response dict.
         """
-        url = 'https://api.jsonbin.io/v3'
-        headers = {
-            'X-Master-Key': self.jsonbin_key,
-            'Content-Type': 'application/json'
-        }
-        put_resp = requests.put(f'{url}/b/{bin_id}',
-                                json=data,
-                                headers=headers)
-        return put_resp.json()
+        return self._check(
+            requests.put(f'{BASE_URL}/b/{bin_id}',
+                         json=data,
+                         headers={
+                             **self._auth,
+                             'Content-Type': 'application/json',
+                             'X-Bin-Versioning': 'false',
+                         }))

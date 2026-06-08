@@ -114,6 +114,7 @@ class ArchiveYouTube:
             except Exception as e:
                 if 'Private video' in str(e) or 'Video unavailable' in str(e):
                     return 'not available'
+                raise
             filename = ydl.prepare_filename(info)
             return Path(filename).suffix
 
