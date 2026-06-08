@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 pymongo = {version = ">=4.0.2", extras = ["srv"]}
 yt-dlp = ">=2022.5.18"
 internetarchive = ">=3.0.0"
