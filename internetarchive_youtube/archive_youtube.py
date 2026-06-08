@@ -154,7 +154,7 @@ class ArchiveYouTube:
         data = [x for x in data if not x['downloaded'] or not x['uploaded']]
         data = [
             x for x in data if x['downloaded'] != 'not available'
-            or x['uploaded'] != 'not available'
+            and x['uploaded'] != 'not available'
         ]
 
         random.shuffle(data)
@@ -408,20 +408,25 @@ class ArchiveYouTube:
             if not is_downloaded:
                 return
 
-            if mongodb:
-                col.update_one({'_id': _id}, {
-                    '$set': {
-                        'downloaded': is_downloaded,
-                        'uploaded': is_downloaded
-                    }
-                })
-            elif jsonbin:
-                video['downloaded'] = is_downloaded
-                video['uploaded'] = is_downloaded
-                jb.update_bin(bin_id, self._data)
-
             if is_downloaded == 'not available':
+                if mongodb:
+                    col.update_one({'_id': _id}, {
+                        '$set': {
+                            'downloaded': 'not available',
+                            'uploaded': 'not available'
+                        }
+                    })
+                elif jsonbin:
+                    video['downloaded'] = 'not available'
+                    video['uploaded'] = 'not available'
+                    jb.update_bin(bin_id, self._data)
                 return
+
+            if mongodb:
+                col.update_one({'_id': _id}, {'$set': {'downloaded': True}})
+            elif jsonbin:
+                video['downloaded'] = True
+                jb.update_bin(bin_id, self._data)
 
             logger.debug('✅ Downloaded!')
             time.sleep(3)
@@ -458,6 +463,14 @@ class ArchiveYouTube:
 
         mongodb, jsonbin, col, jb, bin_id, data = self.load_data()
         self._data = data
+
+        if not data:
+            logger.warning(
+                'No videos to process. If this is your first run, '
+                'populate the database first with: '
+                'internetarchive-youtube --create-collection')
+            return
+
         input_dict = {
             'mongodb': mongodb,
             'jsonbin': jsonbin,
