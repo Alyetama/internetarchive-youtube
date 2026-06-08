@@ -138,9 +138,13 @@ def _create_collection(no_logs: bool = False) -> None:
             channels = f.read()
 
     try:
-        channels = json.loads(channels).items()
+        channels = list(json.loads(channels).items())
     except json.decoder.JSONDecodeError:
-        channels = [tuple(x.split(': ')) for x in channels.strip().split('\n')]
+        channels = [
+            tuple(x.split(': ', 1))
+            for x in channels.strip().split('\n')
+            if x.strip() and ': ' in x
+        ]
 
     random.shuffle(channels)
 
@@ -159,14 +163,14 @@ def main() -> None:
     signal.signal(signal.SIGALRM, _alarm_handler)
     timeout = int(args.timeout * 3600)
 
-    if args.create_collection:
-        _create_collection(no_logs=args.no_logs)
-        sys.exit(0)
-
     if not args.channels_file:
         args.channels_file = f'{Path.home()}/.yt_channels.txt'
         if not os.getenv('CHANNELS'):
             os.environ['CHANNELS'] = args.channels_file
+
+    if args.create_collection:
+        _create_collection(no_logs=args.no_logs)
+        sys.exit(0)
 
     if args.show_channels:
         chs_file = Path(args.channels_file)
