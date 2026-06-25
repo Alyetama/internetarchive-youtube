@@ -131,7 +131,9 @@ def _create_collection(no_logs: bool = False) -> None:
         raise TypeError('`CHANNELS` cannot be empty!')
 
     if channels.startswith('http'):
-        channels = requests.get(channels).text
+        resp = requests.get(channels, timeout=30)
+        resp.raise_for_status()
+        channels = resp.text
 
     elif Path(channels).exists():
         with open(channels) as f:

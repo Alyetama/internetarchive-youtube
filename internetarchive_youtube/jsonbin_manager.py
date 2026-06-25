@@ -5,6 +5,7 @@ import requests
 
 BASE_URL = 'https://api.jsonbin.io/v3'
 COLLECTION_NAME = 'yt_archive_sync_collection'
+TIMEOUT = 30
 
 
 class NoDataToInclude(Exception):
@@ -58,7 +59,7 @@ class JSONBin:
 
         # --- Find or create the collection ---
         collections = self._check(
-            requests.get(f'{BASE_URL}/c', headers=self._auth))
+            requests.get(f'{BASE_URL}/c', headers=self._auth, timeout=TIMEOUT))
 
         collection_id = None
         for col in collections:
@@ -73,13 +74,15 @@ class JSONBin:
                               headers={
                                   **self._auth,
                                   'X-Collection-Name': COLLECTION_NAME
-                              }))
+                              },
+                              timeout=TIMEOUT))
             collection_id = data['record']
 
         # --- Find or create the DATA bin ---
         bins = self._check(
             requests.get(f'{BASE_URL}/c/{collection_id}/bins',
-                         headers=self._auth))
+                         headers=self._auth,
+                         timeout=TIMEOUT))
 
         bin_id = None
         for b in bins:
@@ -100,7 +103,8 @@ class JSONBin:
                                   'Content-Type': 'application/json',
                                   'X-Bin-Name': 'DATA',
                                   'X-Collection-Id': collection_id,
-                              }))
+                              },
+                              timeout=TIMEOUT))
             bin_id = data['metadata']['id']
 
         return bin_id
@@ -115,7 +119,9 @@ class JSONBin:
             The full response dict with 'record' and 'metadata' keys.
         """
         return self._check(
-            requests.get(f'{BASE_URL}/b/{bin_id}', headers=self._auth))
+            requests.get(f'{BASE_URL}/b/{bin_id}',
+                         headers=self._auth,
+                         timeout=TIMEOUT))
 
     def update_bin(self, bin_id: str, data) -> dict:
         """Replace the bin contents.
@@ -134,4 +140,5 @@ class JSONBin:
                              **self._auth,
                              'Content-Type': 'application/json',
                              'X-Bin-Versioning': 'false',
-                         }))
+                         },
+                         timeout=TIMEOUT))

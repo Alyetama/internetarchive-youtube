@@ -69,7 +69,7 @@ class CreateCollection:
         if self.cookies_file:
             cmd_prefix = f'yt-dlp --cookies {self.cookies_file}'
         else:
-            cmd_prefix = f'yt-dlp'
+            cmd_prefix = 'yt-dlp'
         cmd = f'{cmd_prefix} {playlist_end} --get-filename -o ' \
               '\'{"upload_date": "%(upload_date)s", ' \
               '"title": "%(title)s", "url": ' \
@@ -83,21 +83,33 @@ class CreateCollection:
 
         Args:
             data (list): The data to append.
+
+        Returns:
+            list: Videos with a resolvable id, each enriched with `_id` and
+                channel metadata. Entries whose URL cannot be parsed are
+                skipped instead of inheriting a stale id from a prior loop.
         """
+        parsed = []
         for video in data:
-            if 'youtube' in video['url']:
-                _id = video['url'].split('watch?v=')[1]
-            elif 'twitch' in video['url']:
-                _id = Path(video['url']).stem
+            url = video['url']
+            if 'youtube' in url and 'watch?v=' in url:
+                _id = url.split('watch?v=')[1]
+            elif 'twitch' in url:
+                _id = Path(url).stem
                 if _id.startswith('v'):
                     _id = _id[1:]
-                    video['url'] = str(Path(video['url']).parent / _id)
+                    video['url'] = str(Path(url).parent / _id)
+            else:
+                logger.warning(
+                    f'Could not parse a video id from URL "{url}". Skipping...')
+                continue
             video.update({
-                '_id': _id,  # noqa
+                '_id': _id,
                 'channel_name': self.channel_name,
                 'channel_url': self.channel_url
             })
-        return data
+            parsed.append(video)
+        return parsed
 
     def create_collection(self):
         """Creates the collection."""

@@ -10,6 +10,7 @@ import re
 import signal
 import string
 import sys
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -75,6 +76,7 @@ class ArchiveYouTube:
         self.specific_channel = specific_channel
         self.cookies_file = cookies_file
         self._data = None
+        self._lock = threading.Lock()
 
     def keyboard_interrupt_handler(self, sig: int, _) -> None:
         logger.warning(f'\nKeyboardInterrupt (id: {sig}) has been caught...')
@@ -196,7 +198,7 @@ class ArchiveYouTube:
 
         publish_date = f'{y}-{m}-{d}'
         identifier = f'{y}-{m}-{d}_{video["channel_name"]}'
-        left_len = 80 - (len(identifier) + 1)
+        left_len = max(0, 80 - (len(identifier) + 1))
         identifier = f'{identifier}_{clean_name[:left_len]}'
 
         custom_fields = {
@@ -294,7 +296,7 @@ class ArchiveYouTube:
                 identifier = str(uuid.uuid4())
             else:
                 logger.debug(f'{video["_id"]} is already uploaded...')
-                return
+                return 200
 
         logger.debug(f'🚀 (CURRENT UPLOAD) -> File: {fname}; Identifier: '
                      f'{identifier}; YT title: {video["title"]}; YT URL: '
@@ -372,9 +374,10 @@ class ArchiveYouTube:
                     }
                 })
             elif jsonbin:
-                video['downloaded'] = 'not available'
-                video['uploaded'] = 'not available'
-                jb.update_bin(bin_id, self._data)
+                with self._lock:
+                    video['downloaded'] = 'not available'
+                    video['uploaded'] = 'not available'
+                    jb.update_bin(bin_id, self._data)
             return
         fname = f'{title}{f_suffix}'
 
@@ -418,16 +421,18 @@ class ArchiveYouTube:
                         }
                     })
                 elif jsonbin:
-                    video['downloaded'] = 'not available'
-                    video['uploaded'] = 'not available'
-                    jb.update_bin(bin_id, self._data)
+                    with self._lock:
+                        video['downloaded'] = 'not available'
+                        video['uploaded'] = 'not available'
+                        jb.update_bin(bin_id, self._data)
                 return
 
             if mongodb:
                 col.update_one({'_id': _id}, {'$set': {'downloaded': True}})
             elif jsonbin:
-                video['downloaded'] = True
-                jb.update_bin(bin_id, self._data)
+                with self._lock:
+                    video['downloaded'] = True
+                    jb.update_bin(bin_id, self._data)
 
             logger.debug('✅ Downloaded!')
             time.sleep(3)
@@ -439,16 +444,17 @@ class ArchiveYouTube:
                 if mongodb:
                     col.update_one({'_id': _id}, {'$set': {'uploaded': True}})
                 elif jsonbin:
-                    video['uploaded'] = True
-                    jb.update_bin(bin_id, self._data)
+                    with self._lock:
+                        video['uploaded'] = True
+                        jb.update_bin(bin_id, self._data)
                 logger.debug('✅ Uploaded!')
-                Path(fname).unlink()
+                Path(fname).unlink(missing_ok=True)
 
             else:
                 logger.error(f'❌ Could not upload {video}!')
                 logger.error(f'❌ Request response: {resp}.')
                 if not self.keep_failed_uploads:
-                    Path(fname).unlink()
+                    Path(fname).unlink(missing_ok=True)
                 else:
                     if not self.no_logs:
                         md_str = '\n'.join(
@@ -485,7 +491,7 @@ class ArchiveYouTube:
                 itertools.repeat(x, len(self._data))
                 for x in input_dict.values()
             ]
-            max_workers = min(32, os.cpu_count() + 4)
+            max_workers = min(32, (os.cpu_count() or 1) + 4)
             if self.threads:
                 if self.threads > max_workers:
                     self.threads = max_workers
