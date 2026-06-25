@@ -1,0 +1,44 @@
+<svg viewBox="0 0 760 374" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
+  <defs>
+    <style>
+      text{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;}
+      .title{fill:#1f2328;font-size:19px;font-weight:700;}
+      .sub{fill:#656d76;font-size:13.5px;}
+      .lbl{fill:#1f2328;font-size:13.5px;font-weight:600;}
+      .req{fill:#cf222e;font-size:13.5px;}
+      .muted{fill:#656d76;font-size:12.5px;}
+      .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;fill:#1f2328;}
+      .crumb{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;fill:#656d76;}
+      .card{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2;}
+      .panel{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2;}
+      .field{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2;}
+      .btn{fill:#1f883d;stroke:#1a7f37;stroke-width:1;}
+      .btnt{fill:#ffffff;font-size:13.5px;font-weight:600;}
+      .opt{fill:#fff1e5;stroke:#ffb77c;stroke-width:1;}
+      .optt{fill:#bc4c00;font-size:11px;font-weight:700;}
+    </style>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="759" height="373" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+  <text x="24" y="40" class="title">Step 7 — Customize the run</text>
+  <rect x="294" y="26" width="74" height="20" rx="10" class="opt"/>
+  <text x="331" y="40" text-anchor="middle" class="optt">OPTIONAL</text>
+  <text x="24" y="63" class="sub">Skip this to use the defaults, or override them with a CLI_OPTIONS secret.</text>
+
+  <rect x="24" y="82" width="712" height="34" rx="8" class="panel"/>
+  <text x="40" y="104" class="crumb">Settings  ›  Secrets and variables  ›  Actions  ›  <tspan fill="#0969da" font-weight="700">New repository secret</tspan></text>
+
+  <rect x="24" y="132" width="712" height="224" rx="10" class="card"/>
+
+  <text x="44" y="168" class="lbl">Name <tspan class="req">*</tspan></text>
+  <rect x="44" y="178" width="380" height="36" rx="6" class="field"/>
+  <text x="58" y="201" class="mono">CLI_OPTIONS</text>
+
+  <text x="44" y="248" class="lbl">Secret <tspan class="req">*</tspan></text>
+  <rect x="44" y="258" width="668" height="56" rx="6" class="field"/>
+  <text x="58" y="282" class="mono">--multithreading --use-aria2c --timeout 5</text>
+
+  <rect x="44" y="322" width="104" height="34" rx="6" class="btn"/>
+  <text x="96" y="344" text-anchor="middle" class="btnt">Add secret</text>
+  <text x="166" y="344" class="muted">See the CLI options table below for everything available.</text>
+</svg>

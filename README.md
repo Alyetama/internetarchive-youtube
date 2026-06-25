@@ -29,9 +29,16 @@
 
 3. **[Create a backend database (or JSON bin)](<#%EF%B8%8F-creating-a-backend-database> "Creating a backend database").**
 
+<img src="docs/img/step3-backend-database.png" width="720" alt="Step 3: create a backend database — MongoDB (recommended) gives a MONGODB_CONNECTION_STRING, JSONBin gives a JSONBIN_KEY">
+
 4. **Add your *Archive.org* credentials to the repository's actions secrets:**
   - `ARCHIVE_USER_EMAIL`
   - `ARCHIVE_PASSWORD`
+
+<img src="docs/img/step4-archive-secrets.png" width="720" alt="Step 4: add ARCHIVE_USER_EMAIL and ARCHIVE_PASSWORD under Settings → Secrets and variables → Actions → New repository secret">
+
+> [!NOTE]
+> Secrets live under your fork's **Settings → Secrets and variables → Actions → New repository secret**. Add each one with its **Name** and **Secret** value, then click **Add secret**.
 
 5. **Add a list of the channels you want to archive as a `CHANNELS` secret to the repository's actions secrets:**
 
@@ -46,6 +53,8 @@ SOME_CHANNEL: SOME_CHANNEL_URL
 
 Don't add any quotes around the name or the URL, and make sure to keep one space between the colon and the URL.
 
+<img src="docs/img/step5-channels-secret.png" width="720" alt="Step 5: add a CHANNELS secret with one 'name: url' pair per line, one space after the colon and no quotes">
+
 6. **Add the database secret(s) to the repository's *Actions* secrets:**
 
 If you picked **option 1 (MongoDB)**, add this secret:
@@ -56,9 +65,15 @@ If you picked **option 2 (JSON bin)**, add this additional secret:
   - `JSONBIN_KEY`  
 The value of this secret is the *MASTER KEY* token you copied from JSONbin.
 
+<img src="docs/img/step6-database-secret.png" width="720" alt="Step 6: add MONGODB_CONNECTION_STRING (or JSONBIN_KEY) as a repository secret using the value from step 3">
+
 7. (optional) You can add command line options other than the defaults by creating a secret called `CLI_OPTIONS` and adding the options to the secret. See the [CLI: Getting Started](<#-cli-getting-started> "CLI: Getting Started") for a list of all the available options.
 
+<img src="docs/img/step7-cli-options.png" width="720" alt="Step 7 (optional): add a CLI_OPTIONS secret to override the default command-line flags">
+
 8. **Run the workflow under `Actions` manually, or wait for it to run automatically every 6 hours.**
+
+<img src="docs/img/step8-run-workflow.png" width="720" alt="Step 8: open the Actions tab, select the Internetarchive-YouTube Sync workflow, and click Run workflow">
 
 That's it! 🎉
 

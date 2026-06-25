@@ -1,0 +1,56 @@
+<svg viewBox="0 0 760 372" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
+  <defs>
+    <style>
+      text{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;}
+      .title{fill:#1f2328;font-size:19px;font-weight:700;}
+      .sub{fill:#656d76;font-size:13.5px;}
+      .h{fill:#1f2328;font-size:15px;font-weight:600;}
+      .txt{fill:#1f2328;font-size:13.5px;}
+      .muted{fill:#656d76;font-size:13px;}
+      .card{fill:#ffffff;stroke:#d0d7de;stroke-width:1.2;}
+      .panel{fill:#f6f8fa;stroke:#d0d7de;stroke-width:1.2;}
+      .chip{fill:#ddf4ff;stroke:#54aeff;stroke-width:1;}
+      .chipt{fill:#0969da;font-size:12.5px;font-weight:700;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+      .badge{fill:#dafbe1;stroke:#aceebb;stroke-width:1;}
+      .badget{fill:#1a7f37;font-size:11px;font-weight:700;}
+    </style>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="759" height="371" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+  <text x="24" y="40" class="title">Step 3 — Create a backend database</text>
+  <text x="24" y="63" class="sub">Pick one option. It stores progress so jobs can resume where they left off.</text>
+
+  <!-- Option 1: MongoDB -->
+  <rect x="24" y="86" width="344" height="214" rx="10" class="card"/>
+  <rect x="44" y="102" width="66" height="20" rx="10" class="badge"/>
+  <text x="77" y="116" text-anchor="middle" class="badget">OPTION 1</text>
+  <rect x="118" y="102" width="104" height="20" rx="10" class="badge"/>
+  <text x="170" y="116" text-anchor="middle" class="badget">RECOMMENDED</text>
+  <circle cx="58" cy="152" r="13" fill="#00684A"/>
+  <path d="M58 142 C53 149 53 158 58 163 C63 158 63 149 58 142 Z" fill="#b8e986"/>
+  <text x="82" y="157" class="h">MongoDB</text>
+  <text x="44" y="190" class="txt">•  Free cloud cluster on Atlas</text>
+  <text x="44" y="212" class="txt">•  or self-host it yourself</text>
+  <line x1="44" y1="232" x2="348" y2="232" stroke="#d0d7de"/>
+  <text x="44" y="254" class="muted">Gives you the secret:</text>
+  <rect x="44" y="262" width="304" height="28" rx="6" class="chip"/>
+  <text x="58" y="280" class="chipt">MONGODB_CONNECTION_STRING</text>
+
+  <!-- Option 2: JSONBin -->
+  <rect x="392" y="86" width="344" height="214" rx="10" class="card"/>
+  <rect x="412" y="102" width="66" height="20" rx="10" class="badge"/>
+  <text x="445" y="116" text-anchor="middle" class="badget">OPTION 2</text>
+  <circle cx="426" cy="152" r="13" fill="#0969da"/>
+  <text x="426" y="157" text-anchor="middle" fill="#ffffff" font-size="14px" font-weight="700">{ }</text>
+  <text x="450" y="157" class="h">JSONBin</text>
+  <text x="412" y="190" class="txt">•  Sign up at jsonbin.io</text>
+  <text x="412" y="212" class="txt">•  Click VIEW MASTER KEY, then copy it</text>
+  <line x1="412" y1="232" x2="716" y2="232" stroke="#d0d7de"/>
+  <text x="412" y="254" class="muted">Gives you the secret:</text>
+  <rect x="412" y="262" width="150" height="28" rx="6" class="chip"/>
+  <text x="426" y="280" class="chipt">JSONBIN_KEY</text>
+
+  <!-- footer note -->
+  <rect x="24" y="320" width="712" height="36" rx="8" class="panel"/>
+  <text x="42" y="343" class="muted">→   You'll paste this value into a repository secret in Step 6.</text>
+</svg>
